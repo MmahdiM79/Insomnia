@@ -13,7 +13,7 @@ import java.awt.*;
  * @author Mohammad Mahdi Malmasi
  * @version 0.0.0
  */
-public class MainFrame
+public class MainFrame 
 {
             /*  Feilds  */
 
@@ -25,6 +25,9 @@ public class MainFrame
 
     // request details
     private static JPanel requestDetailsPanel = new JPanel();
+
+    // background color of panels
+    private static Color backgroundColor = new Color(46, 47, 44);
 
 
 
@@ -76,16 +79,20 @@ public class MainFrame
             addTab.add(getNewTabNameField); // add text field
             addTab.add(addButton); // add button
 
-            addTab.setBackground(new Color(46, 47, 44)); // set color
+            addTab.setBackground(backgroundColor); // set color
             addTab.setOpaque(true); // apply color changes
 
-
+            // set last requests panel
+            JPanel lastRequestsPanel = new JPanel(); // create new panel
+            lastRequestsPanel.setLayout(new GridBagLayout()); // set the layout manager
+            lastRequestsPanel.setBackground(backgroundColor); // set the background color
+            lastRequestsPanel.setOpaque(true); // apply color changes
 
             // set request grouping
             JTabbedPane requestGroups = new JTabbedPane(); // create new tabbed pane
-            requestGroups.setBackground(new Color(46, 47, 44)); // set color
+            requestGroups.setBackground(backgroundColor); // set color
             requestGroups.setOpaque(true); // apply color changes
-            requestGroups.addTab("last requests", new JPanel()); 
+            requestGroups.addTab("last requests", lastRequestsPanel); 
             requestGroups.addTab(" + ", addTab);      
 
 
@@ -100,15 +107,16 @@ public class MainFrame
 
         // set the new requests details panel
         {
+            // set the panel
             requestDetailsPanel.setLayout(new BorderLayout()); // set the layout manager
-            requestDetailsPanel.setBackground(new Color(46, 47, 44));
+            requestDetailsPanel.setBackground(backgroundColor);
             requestDetailsPanel.setOpaque(true); 
             frame.add(requestDetailsPanel, BorderLayout.CENTER);
 
 
             // set the kind combo box
             JComboBox<String> kindComboBox = new JComboBox<>(); // create new combo box
-            kindComboBox.setPreferredSize(new Dimension(100, 50)); // set size 
+            kindComboBox.setPreferredSize(new Dimension(92, 50)); // set size 
             kindComboBox.addItem(" GET ");
             kindComboBox.addItem(" POST ");
             kindComboBox.addItem(" PUT ");
@@ -122,17 +130,24 @@ public class MainFrame
             // set url text field
             JTextField getUrlTextField = new JTextField(" https:// ?! "); // create new text field
             getUrlTextField.setPreferredSize(new Dimension(300, 50)); // set size 
-            getUrlTextField.setFont(getUrlTextField.getFont().deriveFont(15.0f)); // set text size
+            getUrlTextField.setFont(getUrlTextField.getFont().deriveFont(17.0f)); // set text size
             getUrlTextField.setBackground(Color.WHITE); // set background color
             getUrlTextField.setForeground(Color.BLACK); // set foreground color
             getUrlTextField.setOpaque(true); // apply color changes
 
             // set send button
-            JButton sendButton = new JButton(" Send "); // create new button
-            sendButton.setPreferredSize(new Dimension(70, 50)); // set size
+            JButton sendButton = new JButton("Send"); // create new button
+            sendButton.setPreferredSize(new Dimension(57, 50)); // set size
             sendButton.setBackground(Color.WHITE); // set background color
-            sendButton.setForeground(Color.GREEN); // set foreground color
+            sendButton.setForeground(new Color(76, 159, 103)); // set foreground color
             sendButton.setOpaque(true); // apply color changes
+
+            // set the save button
+            JButton saveButton = new JButton("Save"); // create a new button
+            saveButton.setPreferredSize(new Dimension(57, 50)); // set size
+            saveButton.setBackground(Color.WHITE); // set background color
+            saveButton.setForeground(new Color(76, 159, 103)); // set foreground color
+            saveButton.setOpaque(true); // apply color changes
 
             // set the north panel of the request detail
             JPanel northPanel = new JPanel(); // creat new panel
@@ -142,8 +157,75 @@ public class MainFrame
             northPanel.add(kindComboBox); // add kind combo box
             northPanel.add(getUrlTextField); // add get url text field
             northPanel.add(sendButton); // add send button
+            northPanel.add(saveButton); // add save button
 
+            // add to the request detail panel
             requestDetailsPanel.add(northPanel, BorderLayout.NORTH);
+
+
+
+
+
+            /*  set request details  */
+
+            // set the tabs
+            JTabbedPane requestDetails = new JTabbedPane(); // create new tabbed pane
+            requestDetails.setBackground(backgroundColor); // set color
+            requestDetails.setOpaque(true); // apply color changes
+            requestDetailsPanel.add(requestDetails);
+
+            // set body tab
+            JPanel bodyPanel = new JPanel(); // creat new panel
+            bodyPanel.setBackground(backgroundColor); // set background color
+            bodyPanel.setOpaque(true); // apply color changes
+            bodyPanel.setLayout(new GridBagLayout()); // set layout manager
+            GridBagConstraints gbc = new GridBagConstraints();
+            
+            JComboBox<String> bodyKinds = new JComboBox<>(); // create new combo box
+            bodyKinds.setBackground(backgroundColor); // set background color
+            bodyKinds.setOpaque(true); // apply color changes
+            bodyKinds.addItem("Form data"); 
+            bodyKinds.addItem("JSON");
+            bodyKinds.addItem("Binary Data");
+            gbc.gridx = gbc.gridy = 0;
+            gbc.weightx = 1; 
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            bodyPanel.add(bodyKinds, gbc);
+            requestDetails.add("Body", bodyPanel); // add body panel
+
+            // set the body edit panel
+            JPanel bodyEditPanel = new JPanel(); // create new panel
+            bodyEditPanel.setLayout(new CardLayout()); // set layout manager
+            bodyEditPanel.setBackground(backgroundColor); // set the background color
+            bodyEditPanel.setOpaque(true); // apply color changes
+            
+            // set the form data Panel
+            JPanel formDataPanel = new JPanel(); // create new panel
+            formDataPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
+            formDataPanel.setBackground(backgroundColor); // set background color
+            formDataPanel.setOpaque(true); // apply color changes
+
+            JTextField dataName = new JTextField("name...");
+            dataName.setPreferredSize(new Dimension(224, 40));
+            JTextField dataValue = new JTextField("value...");
+            dataValue.setPreferredSize(new Dimension(224, 40));
+            JRadioButton selectButton = new JRadioButton();
+            JButton deletButton = new JButton("✘");
+            deletButton.setFont(deletButton.getFont().deriveFont(17.0f));
+            deletButton.setBackground(backgroundColor);
+            deletButton.setForeground(Color.RED);
+            deletButton.setOpaque(true);
+            deletButton.setPreferredSize(new Dimension(40, 40));
+
+            formDataPanel.add(dataName); formDataPanel.add(dataValue); 
+            formDataPanel.add(selectButton); formDataPanel.add(deletButton);
+
+            bodyEditPanel.add("form data", formDataPanel);
+
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.gridx = 0; gbc.gridy = 1;
+            bodyPanel.add(bodyEditPanel, gbc);
         }
     }
 
