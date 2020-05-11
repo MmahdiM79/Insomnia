@@ -178,6 +178,7 @@ public class MainFrame
             requestDetailsPanel.add(requestDetails);
 
             // set body tab
+            {
             JPanel bodyPanel = new JPanel(); // creat new panel
             bodyPanel.setBackground(backgroundColor); // set background color
             bodyPanel.setOpaque(true); // apply color changes
@@ -247,7 +248,30 @@ public class MainFrame
 
             // set binary file panel
             JPanel binaryFilePanel = new JPanel(); // create new panel
+            binaryFilePanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // set layout manager
+            binaryFilePanel.setBackground(backgroundColor); // set background color
+            binaryFilePanel.setOpaque(true); // apply color changes
+            bodyEditPanel.add("binary file", binaryFilePanel); // add binary file panel
+
+            JLabel choosenFileName = new JLabel("No file selected !"); // create new label
+            choosenFileName.setPreferredSize(new Dimension(500, 35)); // set size
+            choosenFileName.setFont(choosenFileName.getFont().deriveFont(14.0f)); // set text size
+            choosenFileName.setBackground(Color.WHITE); // set back ground color
+            choosenFileName.setOpaque(true); // apply color changes
+            binaryFilePanel.add(choosenFileName); // add to the binary file panel
             
+            JButton resetChoosenFileButton = new JButton(" Reset file"); // create new button
+            resetChoosenFileButton.setPreferredSize(new Dimension(100, 35)); // set button size
+            resetChoosenFileButton.setBackground(backgroundColor); resetChoosenFileButton.setForeground(Color.RED);
+            resetChoosenFileButton.setOpaque(true); // apply color changes
+            binaryFilePanel.add(resetChoosenFileButton); // add to the binary file panel
+
+            JButton choosenFileButton = new JButton(" Choose file "); // create new button
+            choosenFileButton.setPreferredSize(new Dimension(105, 35)); // set button size
+            choosenFileButton.setBackground(backgroundColor); choosenFileButton.setForeground(Color.GREEN);
+            choosenFileButton.setOpaque(true); // apply color changes
+            binaryFilePanel.add(choosenFileButton); // add to the binary panel
+            }
         }
     }
 
