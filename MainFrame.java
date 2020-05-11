@@ -70,7 +70,7 @@ public class MainFrame
             JPanel addTab = new JPanel(); // create new panel
             addTab.setLayout(new FlowLayout()); // set the layout manager
             
-            JTextField getNewTabNameField = new JTextField(" new group name ... ");
+            JFormattedTextField getNewTabNameField = new JFormattedTextField(" new group name ... ");
             getNewTabNameField.setPreferredSize(new Dimension(190, 33)); // set size
             getNewTabNameField.setFont(insomniaText.getFont().deriveFont(15.0f)); // set text size
 
@@ -131,7 +131,7 @@ public class MainFrame
             kindComboBox.setOpaque(true); // apply color changes
 
             // set url text field
-            JTextField getUrlTextField = new JTextField(" https:// ?! "); // create new text field
+            JFormattedTextField getUrlTextField = new JFormattedTextField(" https:// ?! "); // create new text field
             getUrlTextField.setPreferredSize(new Dimension(300, 50)); // set size 
             getUrlTextField.setFont(getUrlTextField.getFont().deriveFont(17.0f)); // set text size
             getUrlTextField.setBackground(Color.WHITE); // set background color
@@ -179,12 +179,15 @@ public class MainFrame
 
             // set body tab
             {
+
             JPanel bodyPanel = new JPanel(); // creat new panel
             bodyPanel.setBackground(backgroundColor); // set background color
             bodyPanel.setOpaque(true); // apply color changes
             bodyPanel.setLayout(new GridBagLayout()); // set layout manager
             GridBagConstraints gbc = new GridBagConstraints();
-            
+            requestDetails.add("Body", bodyPanel); // add body panel
+
+
             JComboBox<String> bodyKinds = new JComboBox<>(); // create new combo box
             bodyKinds.setBackground(backgroundColor); // set background color
             bodyKinds.setOpaque(true); // apply color changes
@@ -194,10 +197,8 @@ public class MainFrame
             gbc.gridx = gbc.gridy = 0;
             gbc.weightx = 1; 
             gbc.fill = GridBagConstraints.HORIZONTAL;
-
             bodyPanel.add(bodyKinds, gbc);
-            requestDetails.add("Body", bodyPanel); // add body panel
-
+           
             // set the body edit panel
             JPanel bodyEditPanel = new JPanel(); // create new panel
             bodyEditPanel.setLayout(new CardLayout()); // set layout manager
@@ -214,9 +215,9 @@ public class MainFrame
             formDataPanel.setBackground(backgroundColor); // set background color
             formDataPanel.setOpaque(true); // apply color changes
 
-            JTextField dataName = new JTextField("name...");
+            JFormattedTextField dataName = new JFormattedTextField("name...");
             dataName.setPreferredSize(new Dimension(224, 40));
-            JTextField dataValue = new JTextField("value...");
+            JFormattedTextField dataValue = new JFormattedTextField("value...");
             dataValue.setPreferredSize(new Dimension(224, 40));
             JRadioButton selectButton = new JRadioButton();
             JButton deletButton = new JButton("✘");
@@ -228,6 +229,7 @@ public class MainFrame
 
             formDataPanel.add(dataName); formDataPanel.add(dataValue); 
             formDataPanel.add(selectButton); formDataPanel.add(deletButton);
+    
 
             bodyEditPanel.add("form data", formDataPanel);
 
@@ -271,6 +273,72 @@ public class MainFrame
             choosenFileButton.setBackground(backgroundColor); choosenFileButton.setForeground(Color.GREEN);
             choosenFileButton.setOpaque(true); // apply color changes
             binaryFilePanel.add(choosenFileButton); // add to the binary panel
+
+            }
+
+           
+            // set Auth tab
+            {
+
+            // set Auth panel
+            JPanel authPanel = new JPanel(); // create new panel
+            authPanel.setLayout(new GridBagLayout()); // set layout manager
+            authPanel.setBackground(backgroundColor); // set background color
+            authPanel.setOpaque(true); // apply changes
+            GridBagConstraints gbc = new GridBagConstraints();
+            requestDetails.addTab("Auth", authPanel); // add auth panel
+
+            JLabel tokenLabel = new JLabel(" TOKEN "); // set text
+            tokenLabel.setMinimumSize(new Dimension(100, 40)); // set size
+            tokenLabel.setFont(tokenLabel.getFont().deriveFont(16.0f)); // set text size
+            tokenLabel.setBackground(backgroundColor); tokenLabel.setForeground(Color.WHITE);
+            tokenLabel.setOpaque(true); // apply color changes
+            gbc.gridx = gbc.gridy = 0;
+            authPanel.add(tokenLabel, gbc); // add to panel
+
+            JFormattedTextField getTokenTextField = new JFormattedTextField(); // create new text field
+            getTokenTextField.setFont(getTokenTextField.getFont().deriveFont(16.0f)); // set text size
+            getTokenTextField.setPreferredSize(new Dimension(100, 35)); // set size
+            gbc.weightx = 3; gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.gridx = 1; gbc.gridy = 0;
+            authPanel.add(getTokenTextField, gbc); // add to the auth panel
+            gbc.fill = 0; gbc.weightx = 0;
+
+            JLabel prefixLabel = new JLabel(" PREFIX "); // set text
+            prefixLabel.setMinimumSize(new Dimension(100, 40)); // set size
+            prefixLabel.setFont(prefixLabel.getFont().deriveFont(16.0f)); // set text size
+            prefixLabel.setBackground(backgroundColor); prefixLabel.setForeground(Color.WHITE);
+            prefixLabel.setOpaque(true); // apply color changes
+            gbc.gridx = 0; gbc.gridy = 1; 
+            authPanel.add(prefixLabel, gbc); // add to panel
+
+            JFormattedTextField getPrefixTextField = new JFormattedTextField(); // create new text field
+            getPrefixTextField.setFont(getPrefixTextField.getFont().deriveFont(16.0f)); // set text size
+            getPrefixTextField.setPreferredSize(new Dimension(100, 35)); // set size
+            gbc.weightx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.gridx = gbc.gridy = 1;
+            authPanel.add(getPrefixTextField, gbc); // add to the auth panel
+            gbc.fill = 0; gbc.weightx = 0;
+
+            JLabel enabledLabel = new JLabel(" ENABLED "); // set text
+            enabledLabel.setMinimumSize(new Dimension(100, 40)); // set size
+            enabledLabel.setFont(enabledLabel.getFont().deriveFont(16.0f)); // set text size
+            enabledLabel.setBackground(backgroundColor); enabledLabel.setForeground(Color.WHITE);
+            enabledLabel.setOpaque(true); // apply color changes
+            gbc.gridx = 0; gbc.gridy = 2; 
+            authPanel.add(enabledLabel, gbc); // add to the auth panel
+
+            JRadioButton enabledCheckButton = new JRadioButton(); // creat new radio button
+            gbc.gridx = 1; gbc.gridy = 2; gbc.fill = GridBagConstraints.HORIZONTAL;
+            authPanel.add(enabledCheckButton, gbc); // add to the auth panel
+
+
+            JLabel space = new JLabel(); // create new label
+            space.setBackground(backgroundColor); // set background color
+            space.setOpaque(true); // apply color changes
+            gbc.weightx = gbc.weighty = 1; gbc.fill = GridBagConstraints.BOTH;
+            gbc.gridx = 0; gbc.gridy = 3;
+            authPanel.add(space, gbc);
             }
         }
     }
