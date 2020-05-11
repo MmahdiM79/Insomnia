@@ -10,6 +10,7 @@ import java.awt.*;
 /**
  * This class is the main frame of the app
  * 
+ * 
  * @author Mohammad Mahdi Malmasi
  * @version 0.0.0
  */
@@ -45,14 +46,14 @@ public class MainFrame
     {
         // set the frame
         frame.setLayout(new BorderLayout()); // set frame layout
-        frame.setMinimumSize(new Dimension(700, 300)); // set minimum size
+        frame.setMinimumSize(new Dimension(850, 400)); // set minimum size
         frame.setLocationByPlatform(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
 
 
-        // set the requests panel
+        /* set the requests panel */
         {
             // set the insomnia label
             JLabel insomniaText = new JLabel("   Insomnia        "); // set text
@@ -105,7 +106,9 @@ public class MainFrame
         }
 
 
-        // set the new requests details panel
+
+        
+        /* set the new requests details panel */
         {
             // set the panel
             requestDetailsPanel.setLayout(new BorderLayout()); // set the layout manager
@@ -161,13 +164,13 @@ public class MainFrame
 
             // add to the request detail panel
             requestDetailsPanel.add(northPanel, BorderLayout.NORTH);
+        }
 
 
 
 
-
-            /*  set request details  */
-
+        /*  set request details  */
+        {
             // set the tabs
             JTabbedPane requestDetails = new JTabbedPane(); // create new tabbed pane
             requestDetails.setBackground(backgroundColor); // set color
@@ -199,6 +202,10 @@ public class MainFrame
             bodyEditPanel.setLayout(new CardLayout()); // set layout manager
             bodyEditPanel.setBackground(backgroundColor); // set the background color
             bodyEditPanel.setOpaque(true); // apply color changes
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.weightx = gbc.weighty = 2;
+            gbc.gridx = 0; gbc.gridy = 1;
+            bodyPanel.add(bodyEditPanel, gbc); // add edit panel 
             
             // set the form data Panel
             JPanel formDataPanel = new JPanel(); // create new panel
@@ -223,9 +230,24 @@ public class MainFrame
 
             bodyEditPanel.add("form data", formDataPanel);
 
-            gbc.fill = GridBagConstraints.BOTH;
-            gbc.gridx = 0; gbc.gridy = 1;
-            bodyPanel.add(bodyEditPanel, gbc);
+            
+            // set Json panel
+            JPanel jsonPanel = new JPanel(); // create new panel
+            jsonPanel.setLayout(new GridLayout(1, 1, 7, 7)); //set layout manager
+            jsonPanel.setBackground(backgroundColor); // set background color
+            jsonPanel.setOpaque(true); // apply color changes
+
+            JTextArea jsonTextArea = new JTextArea(); // creat new text area
+            jsonTextArea.setFont(jsonTextArea.getFont().deriveFont(15.0f)); // set text size
+            jsonPanel.add(jsonTextArea); // add text area
+
+            bodyEditPanel.add("JSON", jsonPanel); // add body panel
+        
+            
+
+            // set binary file panel
+            JPanel binaryFilePanel = new JPanel(); // create new panel
+            
         }
     }
 
