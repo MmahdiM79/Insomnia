@@ -24,8 +24,11 @@ public class MainFrame
     // requests panel
     private static JPanel requestsPanel = new JPanel();
 
-    // request details
+    // request details panel
     private static JPanel requestDetailsPanel = new JPanel();
+
+    // response panel
+    private static JPanel responsePanel = new JPanel();
 
     // background color of panels
     private static Color backgroundColor = new Color(46, 47, 44);
@@ -402,7 +405,15 @@ public class MainFrame
 
 
 
-        
+        /*  set request response part  */
+        {
+            // set response panel
+            responsePanel.setLayout(new BorderLayout(0, 0)); // set layout manager
+            responsePanel.setBackground(backgroundColor); // set background color
+            responsePanel.setOpaque(true); // apply color changes
+            frame.add(responsePanel, BorderLayout.EAST); // add to the frame
+
+        }
     }
 
 
