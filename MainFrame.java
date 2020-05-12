@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 
 
@@ -545,6 +546,65 @@ public class MainFrame
                 JTable headersTable = new JTable();
                 }
             }
+
+
+
+            /*  set menu bar  */
+            {
+                // set menu bar
+                MenuBar frameMenuBar = new MenuBar();
+                
+
+                
+                // set application menu
+                Menu applicationMenu = new Menu("Application");
+                applicationMenu.setShortcut(new MenuShortcut(KeyEvent.VK_1, false));
+                
+                MenuItem optionItem = new MenuItem("Options");
+                optionItem.setShortcut(new MenuShortcut(KeyEvent.VK_O, false));
+                applicationMenu.add(optionItem);
+
+                MenuItem exitItem = new MenuItem("Exit");
+                exitItem.setShortcut(new MenuShortcut(KeyEvent.VK_E, false));
+                applicationMenu.add(exitItem);
+
+
+
+                // set view menu
+                Menu viewMenu = new Menu("View");
+                viewMenu.setShortcut(new MenuShortcut(KeyEvent.VK_2, false));
+
+                MenuItem toggleFullScreenItem = new MenuItem("Toggle Full Screen");
+                toggleFullScreenItem.setShortcut(new MenuShortcut(KeyEvent.VK_U, false));
+                viewMenu.add(toggleFullScreenItem);
+
+                MenuItem toggleSidebarItem = new MenuItem("Toggle Sidebar");
+                toggleSidebarItem.setShortcut(new MenuShortcut(KeyEvent.VK_U, true));
+                viewMenu.add(toggleSidebarItem);
+
+
+
+                // set help menu
+                Menu helpMenu = new Menu("Help");
+                helpMenu.setShortcut(new MenuShortcut(KeyEvent.VK_3, false));
+
+                MenuItem aboutItem = new MenuItem("About");
+                aboutItem.setShortcut(new MenuShortcut(KeyEvent.VK_B, false));
+                helpMenu.add(aboutItem);
+
+                MenuItem helpItem = new MenuItem("Help");
+                helpItem.setShortcut(new MenuShortcut(KeyEvent.VK_H, false));
+                helpMenu.add(helpItem);
+
+
+                frameMenuBar.add(applicationMenu);
+                frameMenuBar.add(viewMenu);
+                frameMenuBar.add(helpMenu);
+                frame.setMenuBar(frameMenuBar);
+            }
+
+
+
 
             }
         }
