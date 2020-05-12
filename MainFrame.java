@@ -524,8 +524,28 @@ public class MainFrame
                 jsonAndRawPanel.add(jsonAndRawLabel); // add text area
 
                 messageBodyShowPanel.add("JSON and RAW", jsonAndRawPanel); // add body panel
+
+                }
+
+
+
+                // set Headers tab
+                {
+                
+                // set header panel
+                JPanel headersPanel = new JPanel(); 
+                headersPanel.setLayout(new GridBagLayout());
+                GridBagConstraints gbc = new GridBagConstraints();
+                headersPanel.setBackground(backgroundColor);
+                headersPanel.setOpaque(true);
+                responseDetailsTabs.add("Headers", headersPanel);
+
+                
+                // set headers table
+                JTable headersTable = new JTable();
                 }
             }
+
             }
         }
     }
