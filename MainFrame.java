@@ -370,7 +370,39 @@ public class MainFrame
 
             }
 
+
+
+            // set Header tab
+            {
+
+            // set the Header Panel
+            JPanel headerPanel = new JPanel(); // create new panel
+            headerPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
+            headerPanel.setBackground(backgroundColor); // set background color
+            headerPanel.setOpaque(true); // apply color changes
+            requestDetails.add("Header", headerPanel); // add Query tab
+
+            JFormattedTextField dataName = new JFormattedTextField("header...");
+            dataName.setPreferredSize(new Dimension(224, 40));
+            JFormattedTextField dataValue = new JFormattedTextField("value...");
+            dataValue.setPreferredSize(new Dimension(224, 40));
+            JRadioButton selectButton = new JRadioButton();
+            JButton deletButton = new JButton("✘");
+            deletButton.setFont(deletButton.getFont().deriveFont(17.0f));
+            deletButton.setBackground(backgroundColor);
+            deletButton.setForeground(Color.RED);
+            deletButton.setOpaque(true);
+            deletButton.setPreferredSize(new Dimension(40, 40));
+
+            headerPanel.add(dataName); headerPanel.add(dataValue); 
+            headerPanel.add(selectButton); headerPanel.add(deletButton);
+
+            }
         }
+
+
+
+        
     }
 
 
