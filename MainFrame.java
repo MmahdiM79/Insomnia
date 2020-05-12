@@ -413,6 +413,60 @@ public class MainFrame
             responsePanel.setOpaque(true); // apply color changes
             frame.add(responsePanel, BorderLayout.EAST); // add to the frame
 
+
+            // set response status panel
+            {
+            
+            JPanel responseStatusPanel = new JPanel(); // create new panel
+            responseStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10)); // set layout manager
+            responseStatusPanel.setBackground(Color.WHITE); // set back ground color
+            responseStatusPanel.setOpaque(true); // apply color changes
+            responsePanel.add(responseStatusPanel, BorderLayout.NORTH); // add to response panel
+
+
+            // set status code label
+            JLabel statusCodLabel = new JLabel("200 OK"); // create new label
+            statusCodLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
+            statusCodLabel.setFont(statusCodLabel.getFont().deriveFont(14.5f)); // set text size
+            statusCodLabel.setMinimumSize(new Dimension(60, 30)); // set size
+            statusCodLabel.setBorder(BorderFactory.createLineBorder(new Color(133, 183, 66), 6)); // set border
+            statusCodLabel.setBackground(new Color(133, 183, 66));
+            statusCodLabel.setForeground(Color.WHITE);
+            statusCodLabel.setOpaque(true); // apply color changes
+            responseStatusPanel.add(statusCodLabel); // add to panel
+
+            // set time label
+            JLabel responseTimeLabel = new JLabel("882ms"); // create new label
+            responseTimeLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
+            responseTimeLabel.setFont(responseTimeLabel.getFont().deriveFont(14.5f)); // set text size
+            responseTimeLabel.setMinimumSize(new Dimension(60, 30)); // set size
+            responseTimeLabel.setBorder(BorderFactory.createLineBorder(new Color(224, 224, 224), 6)); // set border
+            responseTimeLabel.setBackground(new Color(224, 224, 224));
+            responseTimeLabel.setForeground(new Color(102, 102, 102));
+            responseTimeLabel.setOpaque(true); // apply color changes
+            responseStatusPanel.add(responseTimeLabel); // add to panel
+
+            // set size label
+            JLabel responseSizeLabel = new JLabel("50 KB"); // create new label
+            responseSizeLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
+            responseSizeLabel.setFont(responseSizeLabel.getFont().deriveFont(14.5f)); // set text size
+            responseSizeLabel.setMinimumSize(new Dimension(60, 30)); // set size
+            responseSizeLabel.setBorder(BorderFactory.createLineBorder(new Color(224, 224, 224), 6)); // set border
+            responseSizeLabel.setBackground(new Color(224, 224, 224));
+            responseSizeLabel.setForeground(new Color(102, 102, 102));
+            responseSizeLabel.setOpaque(true); // apply color changes
+            responseStatusPanel.add(responseSizeLabel); // add to panel
+
+            // set space label
+            JLabel spacLabel = new JLabel();
+            spacLabel.setPreferredSize(new Dimension(200, 30));
+            spacLabel.setBackground(Color.WHITE);
+            spacLabel.setOpaque(true);
+            responseStatusPanel.add(spacLabel);
+
+
+            
+            }
         }
     }
 
