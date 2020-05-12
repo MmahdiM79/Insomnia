@@ -465,7 +465,16 @@ public class MainFrame
             responseStatusPanel.add(spacLabel);
 
 
-            
+            // set response details
+            {
+
+                // set tabs 
+                JTabbedPane responseDetailsTabs = new JTabbedPane();
+                responseDetailsTabs.setBackground(backgroundColor);
+                responseDetailsTabs.setOpaque(true);
+                responsePanel.add(responseDetailsTabs, BorderLayout.CENTER);
+
+            }
             }
         }
     }
