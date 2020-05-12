@@ -474,6 +474,57 @@ public class MainFrame
                 responseDetailsTabs.setOpaque(true);
                 responsePanel.add(responseDetailsTabs, BorderLayout.CENTER);
 
+
+                // set the message body tab
+                {
+
+                JPanel messageBodyPanel = new JPanel(); // creat new panel
+                messageBodyPanel.setBackground(backgroundColor); // set background color
+                messageBodyPanel.setOpaque(true); // apply color changes
+                messageBodyPanel.setLayout(new GridBagLayout()); // set layout manager
+                GridBagConstraints gbc = new GridBagConstraints();
+                responseDetailsTabs.add("Message Body", messageBodyPanel); // add body panel
+    
+    
+                JComboBox<String> bodyKinds = new JComboBox<>(); // create new combo box
+                bodyKinds.setBackground(backgroundColor); // set background color
+                bodyKinds.setOpaque(true); // apply color changes
+                bodyKinds.addItem("RAW"); 
+                bodyKinds.addItem("JSON");
+                bodyKinds.addItem("Preview");
+                gbc.gridx = gbc.gridy = 0;
+                gbc.weightx = 1; 
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                messageBodyPanel.add(bodyKinds, gbc);
+
+
+                // set the body edit panel
+                JPanel messageBodyShowPanel = new JPanel(); // create new panel
+                messageBodyShowPanel.setLayout(new CardLayout()); // set layout manager
+                messageBodyShowPanel.setBackground(backgroundColor); // set the background color
+                messageBodyShowPanel.setOpaque(true); // apply color changes
+                gbc.fill = GridBagConstraints.BOTH;
+                gbc.weightx = gbc.weighty = 2;
+                gbc.gridx = 0; gbc.gridy = 1;
+                messageBodyPanel.add(messageBodyShowPanel, gbc); // add edit panel 
+
+
+                // set JSON and RAW tab
+
+                JPanel jsonAndRawPanel = new JPanel(); // create new panel
+                jsonAndRawPanel.setLayout(new GridLayout(1, 1, 15, 15)); //set layout manager
+                jsonAndRawPanel.setBackground(backgroundColor); // set background color
+                jsonAndRawPanel.setOpaque(true); // apply color changes
+
+                JLabel jsonAndRawLabel = new JLabel("a"); // creat new text area
+                jsonAndRawLabel.setBorder(BorderFactory.createLineBorder(backgroundColor, 15));
+                jsonAndRawLabel.setBackground(Color.WHITE);
+                jsonAndRawLabel.setOpaque(true);
+                jsonAndRawLabel.setFont(jsonAndRawLabel.getFont().deriveFont(15.0f)); // set text size
+                jsonAndRawPanel.add(jsonAndRawLabel); // add text area
+
+                messageBodyShowPanel.add("JSON and RAW", jsonAndRawPanel); // add body panel
+                }
             }
             }
         }
