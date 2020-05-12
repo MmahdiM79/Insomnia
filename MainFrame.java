@@ -338,8 +338,38 @@ public class MainFrame
             space.setOpaque(true); // apply color changes
             gbc.weightx = gbc.weighty = 1; gbc.fill = GridBagConstraints.BOTH;
             gbc.gridx = 0; gbc.gridy = 3;
-            authPanel.add(space, gbc);
+            authPanel.add(space, gbc); // add to the auth panel
             }
+
+
+
+            // set Query tab
+            {
+            
+            // set the Query Panel
+            JPanel queryPanel = new JPanel(); // create new panel
+            queryPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
+            queryPanel.setBackground(backgroundColor); // set background color
+            queryPanel.setOpaque(true); // apply color changes
+            requestDetails.add("Query", queryPanel); // add Query tab
+
+            JFormattedTextField dataName = new JFormattedTextField("name...");
+            dataName.setPreferredSize(new Dimension(224, 40));
+            JFormattedTextField dataValue = new JFormattedTextField("value...");
+            dataValue.setPreferredSize(new Dimension(224, 40));
+            JRadioButton selectButton = new JRadioButton();
+            JButton deletButton = new JButton("✘");
+            deletButton.setFont(deletButton.getFont().deriveFont(17.0f));
+            deletButton.setBackground(backgroundColor);
+            deletButton.setForeground(Color.RED);
+            deletButton.setOpaque(true);
+            deletButton.setPreferredSize(new Dimension(40, 40));
+
+            queryPanel.add(dataName); queryPanel.add(dataValue); 
+            queryPanel.add(selectButton); queryPanel.add(deletButton);
+
+            }
+
         }
     }
 
