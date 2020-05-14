@@ -22,9 +22,6 @@ public class MainFrame
     // main frame
     private static JFrame frame = new JFrame(" Insomnia ");
 
-    // requests panel
-    private static JPanel requestsPanel = new JPanel();
-
     // request details panel
     private static JPanel requestDetailsPanel = new JPanel();
 
@@ -54,60 +51,6 @@ public class MainFrame
         frame.setLocationByPlatform(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-
-
-
-        /* set the requests panel */
-        {
-            // set the insomnia label
-            JLabel insomniaText = new JLabel("   Insomnia        "); // set text
-            insomniaText.setHorizontalAlignment(SwingConstants.LEFT);
-            insomniaText.setPreferredSize(new Dimension(170, 50)); // set size
-            insomniaText.setFont (insomniaText.getFont().deriveFont(22.0f)); // set text size
-            insomniaText.setForeground(Color.WHITE); // set text color
-            insomniaText.setBackground(new Color(102, 96, 178)); // set back ground color
-            insomniaText.setOpaque(true); // apply color changes
-            
-            
-            
-            // set the '+' tab
-            JPanel addTab = new JPanel(); // create new panel
-            addTab.setLayout(new FlowLayout()); // set the layout manager
-            
-            JFormattedTextField getNewTabNameField = new JFormattedTextField(" new group name ... ");
-            getNewTabNameField.setPreferredSize(new Dimension(190, 33)); // set size
-            getNewTabNameField.setFont(insomniaText.getFont().deriveFont(15.0f)); // set text size
-
-            JButton addButton = new JButton(" Add "); // creat new button
-            addButton.setPreferredSize(new Dimension(70, 35)); // set size
-
-            addTab.add(getNewTabNameField); // add text field
-            addTab.add(addButton); // add button
-
-            addTab.setBackground(backgroundColor); // set color
-            addTab.setOpaque(true); // apply color changes
-
-            // set last requests panel
-            JPanel lastRequestsPanel = new JPanel(); // create new panel
-            lastRequestsPanel.setLayout(new GridBagLayout()); // set the layout manager
-            lastRequestsPanel.setBackground(backgroundColor); // set the background color
-            lastRequestsPanel.setOpaque(true); // apply color changes
-
-            // set request grouping
-            JTabbedPane requestGroups = new JTabbedPane(); // create new tabbed pane
-            requestGroups.setBackground(backgroundColor); // set color
-            requestGroups.setOpaque(true); // apply color changes
-            requestGroups.addTab("last requests", lastRequestsPanel); 
-            requestGroups.addTab(" + ", addTab);      
-
-
-            requestsPanel.setLayout(new BorderLayout());
-            requestsPanel.add(insomniaText, BorderLayout.NORTH);
-            requestsPanel.add(requestGroups, BorderLayout.CENTER);
-
-            
-            frame.add(requestsPanel, BorderLayout.WEST);
-        }
 
 
 
@@ -602,9 +545,6 @@ public class MainFrame
                 frameMenuBar.add(helpMenu);
                 frame.setMenuBar(frameMenuBar);
             }
-
-
-
 
             }
         }
