@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.5
+ * @version 0.1.6
  */
 public class LastRequestsGUI extends JPanel
 {
@@ -38,7 +38,7 @@ public class LastRequestsGUI extends JPanel
     private JPanel addGroupTabPanel;
 
     // get new tab name Text field
-    private JFormattedTextField getNewGroupNameField;
+    private JTextField getNewGroupNameField;
 
     // add new group button
     private JButton addGroupButton;
@@ -57,6 +57,10 @@ public class LastRequestsGUI extends JPanel
 
     // Event handler of buttons
     private EventHandler handler;
+
+
+    // back text color
+    private Color backTextColor = new Color(71, 71, 69);
 
     // background color
     private Color backgroundColor;
@@ -122,10 +126,11 @@ public class LastRequestsGUI extends JPanel
 
 
         // set new tab name text field
-        getNewGroupNameField = new JFormattedTextField("new group name ... ");
-        getNewGroupNameField.setForeground(new Color(71, 71, 69)); // set foreground color
+        getNewGroupNameField = new JTextField("new group name ... ");
+        getNewGroupNameField.setForeground(backTextColor); // set foreground color
         getNewGroupNameField.setPreferredSize(new Dimension(190, 33)); // set size
         getNewGroupNameField.setFont(insomniaLabel.getFont().deriveFont(15.0f)); // set text size
+        getNewGroupNameField.addFocusListener(handler); // set handler
         addGroupTabPanel.add(getNewGroupNameField); // add text field
 
 
@@ -232,18 +237,20 @@ public class LastRequestsGUI extends JPanel
 
     
 
-    private class EventHandler implements ActionListener
+     // This class do the even handling of LastRequestsGUI class
+    private class EventHandler implements ActionListener, FocusListener
     {
         /**
          * This method handl the event of the add button and remove button
          * 
          * @param e : ActionEvent
          */
-        @Override
         public void actionPerformed(ActionEvent e) 
         {
             /* add button case */
-            if (e.getSource().equals(addGroupButton))
+            if (e.getSource().equals(getNewGroupNameField))
+                System.out.println(" checkd");
+            if (e.getSource().equals(getNewGroupNameField) || e.getSource().equals(addGroupButton))
             {
                 // check that client has choose a name for new group or not
                 if (isNewGroupNameEmpty())
@@ -284,5 +291,36 @@ public class LastRequestsGUI extends JPanel
 
             return;
         }
+
+
+
+        /**
+         * This mehtod handle the 
+         */
+        public void focusGained(FocusEvent e) 
+        {
+            /* get group name case */
+            if (e.getSource().equals(getNewGroupNameField))
+            {
+                getNewGroupNameField.setForeground(Color.BLACK);
+                getNewGroupNameField.setOpaque(true);
+                getNewGroupNameField.setText("");
+            }
+        }
+        
+        
+        public void focusLost(FocusEvent e) 
+        {
+            /* get group name case */
+            if (e.getSource().equals(getNewGroupNameField))
+            {
+                if (getNewGroupNameField.getText().length() == 0)
+                {
+                    getNewGroupNameField.setForeground(backTextColor);
+                    getNewGroupNameField.setOpaque(true);
+                    getNewGroupNameField.setText("new group name ... ");
+                }
+            }
+		}
     }
 }
