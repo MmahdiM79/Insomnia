@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.1.5
  */
 public class LastRequestsGUI extends JPanel
 {
@@ -133,7 +133,7 @@ public class LastRequestsGUI extends JPanel
         // set add button
         addGroupButton = new JButton(" Add "); // creat new button
         addGroupButton.setPreferredSize(new Dimension(70, 35)); // set size
-        addGroupButton.addActionListener(handler);
+        addGroupButton.addActionListener(handler); // set handler
         addGroupTabPanel.add(addGroupButton); // add button
 
 
@@ -158,6 +158,7 @@ public class LastRequestsGUI extends JPanel
         // set remove button
         removeGroupButton = new JButton(" Remove "); // creat new button
         removeGroupButton.setPreferredSize(new Dimension(85, 35)); // set size
+        removeGroupButton.addActionListener(handler); // set handler
         removeGroupTabPanel.add(removeGroupButton); // add button
 
         
@@ -263,11 +264,23 @@ public class LastRequestsGUI extends JPanel
                 JPanel newGroupPanel = newEmptyPanel(); // create new panel
                 groupsComboBox.addItem(newGroupName); // add new group name to combo box
                 requestGroupPanels.put(newGroupName, newGroupPanel); // add to the hashMap
-                requestGroupsTabs.addTab(newGroupName, newGroupPanel); // add new tab
+                requestGroupsTabs.insertTab(newGroupName, null, newGroupPanel, null, 1); // add new tab
             }
             
-            // if (e.getSource().equals(removeGroupButton))
-            // {}
+
+
+            /* remove button case */
+            if (e.getSource().equals(removeGroupButton))
+            {
+                // get the client choose
+                String groupNameToRemove = (String)groupsComboBox.getSelectedItem();
+
+
+
+                requestGroupsTabs.remove(requestGroupPanels.get(groupNameToRemove)); // remove from tabs
+                requestGroupPanels.remove(groupNameToRemove); // remove from hashMap
+                groupsComboBox.removeItem(groupNameToRemove); // remove from combo box
+            }
 
             return;
         }
