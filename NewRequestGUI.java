@@ -3,7 +3,7 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 
 
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.5
+ * @version 0.1.8
  */
 public class NewRequestGUI extends JPanel
 {
@@ -35,6 +35,7 @@ public class NewRequestGUI extends JPanel
     private JButton saveButton = new JButton("Save");
 
 
+
     // request details tabs
     private JTabbedPane requestDetailsTabs = new JTabbedPane();
 
@@ -48,6 +49,7 @@ public class NewRequestGUI extends JPanel
     private JPanel bodyTabSubPanel = new JPanel();
 
 
+
     // form data kind card panel (used in bodyTabSubPanel)
     private JPanel formDataKindPanel = new JPanel();
 
@@ -55,11 +57,13 @@ public class NewRequestGUI extends JPanel
     private ArrayList<NameValueData> formDatas = new ArrayList<>();
 
 
+
     // JSON kind card panel (used in bodyTabSubPanel)
     private JPanel jsonKindPanel = new JPanel();
 
     // JSON text area 
     private JTextArea jsonTextArea = new JTextArea();
+
 
 
     // binary file kind card panel (used in bodyTabSubPanel)
@@ -75,6 +79,7 @@ public class NewRequestGUI extends JPanel
     private JButton chooseFileButton = new JButton(" Choose file ");
    
 
+
     // Auth tab panel
     private JPanel authTabPanel = new JPanel();
 
@@ -88,11 +93,13 @@ public class NewRequestGUI extends JPanel
     private JCheckBox enabledCheckButton = new JCheckBox(" ENABLE "); // creat new radio button
 
 
+
     // Query tab panel
     private JPanel queryTabPanel = new JPanel();
 
     // Query datas
-    private ArrayList<NameValueData> QueryDatas = new ArrayList<>();
+    private ArrayList<NameValueData> queryDatas = new ArrayList<>();
+
 
 
     // Header tab panel
@@ -103,14 +110,19 @@ public class NewRequestGUI extends JPanel
 
 
 
+
     // Event handler of buttons
-    private EventHandler handler = new EventHandler();
+    private EventHandler mainHandler = new EventHandler();
 
     // back text color
     private Color backTextColor = new Color(104, 106, 112);
 
     // background color
     private Color backgroundColor;
+
+
+
+
 
 
 
@@ -179,6 +191,14 @@ public class NewRequestGUI extends JPanel
     // This method set the north part of the new request details
     private void urlPartGuiInit()
     {
+        // set the north panel of the request detail
+        JPanel northPanel = new JPanel(); // creat new panel
+        northPanel.setBackground(Color.WHITE); // set the back ground color
+        northPanel.setOpaque(true); // apply color changes
+        northPanel.setLayout(new FlowLayout(0, 0, 0)); // set the layout manager
+        this.add(northPanel, BorderLayout.NORTH); // add to panel
+
+
         // set the kind combo box
         requestKindComboBox.setPreferredSize(new Dimension(92, 50)); // set size 
         requestKindComboBox.addItem("<html><p style=\"color:rgb(121, 108, 197);\"> GET </p></html>");
@@ -190,7 +210,8 @@ public class NewRequestGUI extends JPanel
         requestKindComboBox.setBackground(Color.WHITE); // set background color
         requestKindComboBox.setForeground(new Color(102, 96, 178)); // set foreground color
         requestKindComboBox.setOpaque(true); // apply color changes
-
+        requestDetailsTabs.addFocusListener(mainHandler);
+        northPanel.add(requestKindComboBox); // add kind combo box
 
 
         // set url text field
@@ -199,7 +220,9 @@ public class NewRequestGUI extends JPanel
         getUrlTextField.setBackground(Color.WHITE); // set background color
         getUrlTextField.setForeground(backTextColor); // set foreground color
         getUrlTextField.setOpaque(true); // apply color changes
-
+        getUrlTextField.addActionListener(mainHandler);
+        getUrlTextField.addFocusListener(mainHandler);
+        northPanel.add(getUrlTextField); // add get url text field
 
 
         // set send button
@@ -207,7 +230,9 @@ public class NewRequestGUI extends JPanel
         sendButton.setBackground(Color.WHITE); // set background color
         sendButton.setForeground(new Color(76, 159, 103)); // set foreground color
         sendButton.setOpaque(true); // apply color changes
-
+        sendButton.addActionListener(mainHandler);
+        sendButton.addFocusListener(mainHandler);
+        northPanel.add(sendButton); // add send button
 
 
         // set the save button
@@ -215,23 +240,9 @@ public class NewRequestGUI extends JPanel
         saveButton.setBackground(Color.WHITE); // set background color
         saveButton.setForeground(new Color(76, 159, 103)); // set foreground color
         saveButton.setOpaque(true); // apply color changes
-
-
-
-        // set the north panel of the request detail
-        JPanel northPanel = new JPanel(); // creat new panel
-        northPanel.setBackground(Color.WHITE); // set the back ground color
-        northPanel.setOpaque(true); // apply color changes
-        northPanel.setLayout(new FlowLayout(0, 0, 0)); // set the layout manager
-        northPanel.add(requestKindComboBox); // add kind combo box
-        northPanel.add(getUrlTextField); // add get url text field
-        northPanel.add(sendButton); // add send button
+        saveButton.addActionListener(mainHandler);
+        saveButton.addFocusListener(mainHandler);
         northPanel.add(saveButton); // add save button
-
-
-
-        // add to panel
-        this.add(northPanel, BorderLayout.NORTH);
     }
 
 
@@ -252,7 +263,8 @@ public class NewRequestGUI extends JPanel
         bodyKindsComboBox.addItem("Form data"); 
         bodyKindsComboBox.addItem("JSON");
         bodyKindsComboBox.addItem("Binary file");
-        bodyKindsComboBox.addActionListener(handler);
+        bodyKindsComboBox.addActionListener(mainHandler);
+        bodyKindsComboBox.addFocusListener(mainHandler);
         bodyTabMainPanel.add(bodyKindsComboBox); // add to tab panel
        
         
@@ -273,9 +285,8 @@ public class NewRequestGUI extends JPanel
 
 
         // set form data
-        formDatas.add(new NameValueData("new name ...", "new value ..."));
-        formDataKindPanel.add(formDatas.get(0));
-        
+        formDatas.add(new NameValueData("new name ...", "new value ...", formDataKindPanel, formDatas));
+        formDataKindPanel.add(formDatas.get(0));        
 
 
 
@@ -288,6 +299,7 @@ public class NewRequestGUI extends JPanel
         // set Json text area
         jsonTextArea.setFont(jsonTextArea.getFont().deriveFont(15.0f)); // set text size
         jsonTextArea.setBorder(BorderFactory.createLineBorder(backgroundColor, 30));
+        jsonTextArea.addFocusListener(mainHandler);
         jsonKindPanel.add(jsonTextArea); // add text area
 
         
@@ -305,6 +317,7 @@ public class NewRequestGUI extends JPanel
         choosenBinaryFileName.setFont(choosenBinaryFileName.getFont().deriveFont(14.0f)); // set text size
         choosenBinaryFileName.setBackground(Color.WHITE); // set back ground color
         choosenBinaryFileName.setOpaque(true); // apply color changes
+        choosenBinaryFileName.addFocusListener(mainHandler);
         binaryFileKindPanel.add(choosenBinaryFileName); // add to the binary file panel
         
         
@@ -312,6 +325,8 @@ public class NewRequestGUI extends JPanel
         resetChoosenFileButton.setPreferredSize(new Dimension(100, 35)); // set button size
         resetChoosenFileButton.setBackground(backgroundColor); resetChoosenFileButton.setForeground(Color.RED);
         resetChoosenFileButton.setOpaque(true); // apply color changes
+        resetChoosenFileButton.addActionListener(mainHandler);
+        resetChoosenFileButton.addFocusListener(mainHandler);
         binaryFileKindPanel.add(resetChoosenFileButton); // add to the binary file panel
 
         
@@ -319,6 +334,8 @@ public class NewRequestGUI extends JPanel
         chooseFileButton.setPreferredSize(new Dimension(105, 35)); // set button size
         chooseFileButton.setBackground(backgroundColor); chooseFileButton.setForeground(Color.GREEN);
         chooseFileButton.setOpaque(true); // apply color changes
+        chooseFileButton.addActionListener(mainHandler);
+        chooseFileButton.addFocusListener(mainHandler);
         binaryFileKindPanel.add(chooseFileButton); // add to the binary panel
     }
 
@@ -338,6 +355,8 @@ public class NewRequestGUI extends JPanel
         getTokenTextField.setForeground(backTextColor); // set text color
         getTokenTextField.setOpaque(true); // apply color changes
         getTokenTextField.setMaximumSize(new Dimension(920, 35)); // set size
+        getTokenTextField.addActionListener(mainHandler);
+        getTokenTextField.addFocusListener(mainHandler);
         authTabPanel.add(getTokenTextField); // add to the auth panel
 
 
@@ -346,6 +365,8 @@ public class NewRequestGUI extends JPanel
         getPrefixTextField.setForeground(backTextColor); // set text color
         getPrefixTextField.setOpaque(true); // apply color changes
         getPrefixTextField.setMaximumSize(new Dimension(920, 35)); // set size
+        getPrefixTextField.addActionListener(mainHandler);
+        getPrefixTextField.addFocusListener(mainHandler);
         authTabPanel.add(getPrefixTextField); // add to the auth panel
        
 
@@ -354,6 +375,8 @@ public class NewRequestGUI extends JPanel
         enabledCheckButton.setBackground(backgroundColor); // set background color
         enabledCheckButton.setForeground(Color.GREEN); // set text color
         enabledCheckButton.setOpaque(true); // apply color changes
+        enabledCheckButton.addActionListener(mainHandler);
+        enabledCheckButton.addFocusListener(mainHandler);
         authTabPanel.add(enabledCheckButton); // add to the auth panel
     }
 
@@ -369,8 +392,8 @@ public class NewRequestGUI extends JPanel
 
 
         // set Query datas
-        QueryDatas.add(new NameValueData("new name ...", "new value ..."));
-        queryTabPanel.add(QueryDatas.get(0));
+        queryDatas.add(new NameValueData("new name ...", "new value ...", queryTabPanel, queryDatas));
+        queryTabPanel.add(queryDatas.get(0));
     }
 
 
@@ -384,7 +407,7 @@ public class NewRequestGUI extends JPanel
         requestDetailsTabs.add("Header", headerTabPanel); // add Query tab
 
         // set Header datas
-        headerDatas.add(new NameValueData("new header ...", "new value ..."));
+        headerDatas.add(new NameValueData("new header ...", "new value ...", headerTabPanel, headerDatas));
         headerTabPanel.add(headerDatas.get(0));
     }
 
@@ -417,6 +440,25 @@ public class NewRequestGUI extends JPanel
         // delet button
         private JButton deletButton;
 
+        // where this object will added
+        private JPanel targetPanel;
+
+        // where this object will be saved
+        private ArrayList<NameValueData> holdPlace;
+
+
+        // a pointer to this object
+        private NameValueData THIS = this;
+
+        // buttons and fields mainHandler
+        private DataEventHandler dataHandler = new DataEventHandler();
+
+        // name string
+        private String bgNameString;
+
+        // value string
+        private String bgValueString;
+
         
 
 
@@ -428,14 +470,24 @@ public class NewRequestGUI extends JPanel
          * 
          * @param bgNameText : name text
          * @param bgValueText : value text
+         * @param targetPanel : where this object will added
+         * @param holdPlace : where this object will be saved
          */
-        public NameValueData(String bgNameText, String bgValueText)
+        public NameValueData(String bgNameText, String bgValueText, JPanel targetPanel, ArrayList<NameValueData> holdPlace)
         {
             // set super class
             super();
+            super.setMaximumSize(new Dimension(925, 50)); // set size
             super.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5)); // set layout manager
             super.setBackground(backgroundColor); // set background color
             super.setOpaque(true); // apply color changes
+
+
+
+            bgNameString = bgNameText;
+            bgValueString = bgValueText;
+            this.targetPanel = targetPanel;
+            this.holdPlace = holdPlace;
 
 
             // set name text field
@@ -443,6 +495,8 @@ public class NewRequestGUI extends JPanel
             dataNameTextField.setForeground(backTextColor); // set text color
             dataNameTextField.setOpaque(true); // apply color changes
             dataNameTextField.setPreferredSize(new Dimension(224, 40)); // set size
+            dataNameTextField.addActionListener(dataHandler);
+            dataNameTextField.addFocusListener(dataHandler);
             super.add(dataNameTextField); // add to the panel
         
 
@@ -451,6 +505,8 @@ public class NewRequestGUI extends JPanel
             dataValueTextField.setForeground(backTextColor); // set text color
             dataValueTextField.setOpaque(true); // apply color changes
             dataValueTextField.setPreferredSize(new Dimension(224, 40)); // set size
+            dataValueTextField.addActionListener(dataHandler);
+            dataValueTextField.addFocusListener(dataHandler);
             super.add(dataValueTextField); // add to the panel
 
 
@@ -458,6 +514,8 @@ public class NewRequestGUI extends JPanel
             selectButton = new JRadioButton(); // create new button
             selectButton.putClientProperty("JComponent.sizeVariant", "large"); // set size
             SwingUtilities.updateComponentTreeUI(this);
+            selectButton.addActionListener(dataHandler);
+            selectButton.addFocusListener(dataHandler);
             super.add(selectButton); // add to the panel
 
 
@@ -468,18 +526,88 @@ public class NewRequestGUI extends JPanel
             deletButton.setBackground(backgroundColor); // set background color
             deletButton.setForeground(Color.RED); // set text color
             deletButton.setOpaque(true); // apply color changes
+            deletButton.addActionListener(dataHandler);
+            deletButton.addFocusListener(dataHandler);
             super.add(deletButton); // add to the panel
+        }
+
+
+        private class DataEventHandler implements ActionListener, FocusListener
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                /*  delet button */
+                if (e.getSource().equals(THIS.deletButton))
+                {
+                    if (holdPlace.size() > 1)
+                    {
+                        targetPanel.remove(THIS);
+                        targetPanel.revalidate();
+                        targetPanel.repaint();
+                        holdPlace.remove(THIS);
+                    }
+                }
+            }
+
+
+            public void focusGained(FocusEvent e) 
+            {
+                if (e.getSource().equals(THIS.dataNameTextField)
+                    ||
+                    e.getSource().equals(THIS.dataValueTextField))
+                {
+                    JTextField focusedTextField = (JTextField)e.getSource();
+
+                    focusedTextField.setText("");
+                    focusedTextField.setForeground(Color.BLACK);
+                    focusedTextField.setOpaque(true);
+
+
+                    if (holdPlace.indexOf(THIS) == holdPlace.size()-1)
+                    {
+                        holdPlace.add(new NameValueData(bgNameString, bgValueString, targetPanel, holdPlace));
+                        targetPanel.add(holdPlace.get(holdPlace.size()-1));
+                        targetPanel.revalidate();
+                        targetPanel.repaint();
+                    }
+                }
+            }
+        
+        
+            public void focusLost(FocusEvent e) 
+            {
+                if (e.getSource().equals(THIS.dataNameTextField) 
+                    || 
+                    e.getSource().equals(THIS.dataValueTextField))
+                {
+                    JTextField focusLostedTextField = (JTextField)e.getSource();
+                    if (focusLostedTextField.getText().length() != 0)
+                        return;
+
+
+                    String toPutString;
+                    if (e.getSource().equals(THIS.dataNameTextField))
+                        toPutString = bgNameString;
+                    else
+                        toPutString = bgValueString;
+                        
+                    focusLostedTextField.setText(toPutString);
+                }
+            }
         }
     }
 
 
 
 
-    private class EventHandler implements ActionListener
+
+
+    // This class do the even handling of NewRequestGUI class
+    private class EventHandler implements ActionListener, FocusListener
     {
         public void actionPerformed(ActionEvent e) 
         {
-            /*  body kinds combo box event handler */
+            /*  body kinds combo box event mainHandler */
             if (e.getSource().equals(bodyKindsComboBox))
             {
                 if (bodyKindsComboBox.getSelectedItem().equals("Form data"))
@@ -494,5 +622,25 @@ public class NewRequestGUI extends JPanel
 
             return;
         }
+
+
+
+        public void focusGained(FocusEvent e) 
+        {
+            if (e.getSource() instanceof JTextField)
+            {
+                JTextField focusedTextField = (JTextField)e.getSource();
+
+                focusedTextField.setText("");
+                focusedTextField.setForeground(Color.BLACK);
+                focusedTextField.setOpaque(true);
+            }
+        }
+        
+        
+        public void focusLost(FocusEvent e) 
+        {
+            
+		}
     }
 }
