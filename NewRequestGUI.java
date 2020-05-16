@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.5
  */
 public class NewRequestGUI extends JPanel
 {
@@ -120,8 +120,10 @@ public class NewRequestGUI extends JPanel
          /* Constructor */
 
     /**
-     * Create the 
-     * @param bgColor
+     * Create new panel for new request part
+     * 
+     * 
+     * @param bgColor : the color of the background
      */
     public NewRequestGUI(Color bgColor)
     {
