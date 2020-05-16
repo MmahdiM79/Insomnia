@@ -48,17 +48,66 @@ public class NewRequestGUI extends JPanel
     private JPanel bodyTabSubPanel = new JPanel();
 
 
-    // form data kind card panel (used in bodyTabKindPanel)
+    // form data kind card panel (used in bodyTabSubPanel)
     private JPanel formDataKindPanel = new JPanel();
 
     // form datas
     private ArrayList<NameValueData> formDatas = new ArrayList<>();
 
+
+    // JSON kind card panel (used in bodyTabSubPanel)
+    private JPanel jsonKindPanel = new JPanel();
+
+    // JSON text area 
+    private JTextArea jsonTextArea = new JTextArea();
+
+
+    // binary file kind card panel (used in bodyTabSubPanel)
+    private JPanel binaryFileKindPanel = new JPanel();
+
+    // choosen file status label
+    private JLabel choosenBinaryFileName = new JLabel("No file selected !");
+
+    // reset choosen file button
+    private JButton resetChoosenFileButton = new JButton(" Reset file");
+
+    // choose file button
+    private JButton chooseFileButton = new JButton(" Choose file ");
    
 
+    // Auth tab panel
+    private JPanel authTabPanel = new JPanel();
+
+    // get token text field
+    private JTextField getTokenTextField = new JTextField(" TOKEN . . .");
+
+    // get preifix text field
+    private JTextField getPrefixTextField = new JTextField(" PREFIX . . ."); 
+
+    // enable check box
+    private JCheckBox enabledCheckButton = new JCheckBox(" ENABLE "); // creat new radio button
+
+
+    // Query tab panel
+    private JPanel queryTabPanel = new JPanel();
+
+    // Query datas
+    private ArrayList<NameValueData> QueryDatas = new ArrayList<>();
+
+
+    // Header tab panel
+    private JPanel headerTabPanel = new JPanel();
+
+    // Header datas
+    private ArrayList<NameValueData> headerDatas = new ArrayList<>();
+
+
+
+    // Event handler of buttons
+    private EventHandler handler = new EventHandler();
 
     // back text color
-    private Color backTextColor = new Color(71, 71, 69);
+    private Color backTextColor = new Color(104, 106, 112);
 
     // background color
     private Color backgroundColor;
@@ -68,7 +117,12 @@ public class NewRequestGUI extends JPanel
 
 
 
+         /* Constructor */
 
+    /**
+     * Create the 
+     * @param bgColor
+     */
     public NewRequestGUI(Color bgColor)
     {
         // set the super class
@@ -80,232 +134,31 @@ public class NewRequestGUI extends JPanel
 
 
 
-
         // set background color
         backgroundColor = bgColor;
 
 
 
         // set url part
-        urlPartINIT();
+        urlPartGuiInit();
     
-
 
         // set the tabs
         requestDetailsTabs.setBackground(backgroundColor); // set color
         requestDetailsTabs.setOpaque(true); // apply color changes
         this.add(requestDetailsTabs, BorderLayout.CENTER);
 
-
-
-        // set body tab panel
-        bodyTabMainPanel.setBackground(backgroundColor); // set background color
-        bodyTabMainPanel.setOpaque(true); // apply color changes
-        bodyTabMainPanel.setLayout(new BoxLayout(bodyTabMainPanel, BoxLayout.Y_AXIS)); // set layout manager
-        requestDetailsTabs.add("Body", bodyTabMainPanel); // add body panel
-
-
+        // set body tab
+        bodyTabGuiInit();
         
-        // set body kinds combo box
-        bodyKindsComboBox.setBackground(backgroundColor); // set background color
-        bodyKindsComboBox.setOpaque(true); // apply color changes
-        bodyKindsComboBox.addItem("Form data"); 
-        bodyKindsComboBox.addItem("JSON");
-        bodyKindsComboBox.addItem("Binary Data");
-        bodyTabMainPanel.add(bodyKindsComboBox); // add to tab panel
-       
-        
+        // set auth tab
+        authTabGuiInit();
 
-        // set body kinds panel (CardLayout)
-        bodyTabSubPanel.setLayout(new CardLayout()); // set layout manager
-        bodyTabSubPanel.setBackground(backgroundColor); // set the background color
-        bodyTabSubPanel.setOpaque(true); // apply color changes
-        bodyTabMainPanel.add(bodyTabSubPanel); // add edit panel 
-        
+        // set query tab
+        queryTabGuiInit();
 
-
-        // set the form data Panel
-        formDataKindPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
-        formDataKindPanel.setBackground(backgroundColor); // set background color
-        formDataKindPanel.setOpaque(true); // apply color changes
-
-
-        JPanel addf = new JPanel();
-        addf.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-    
-
-        formDataKindPanel.add(addf);
-        bodyTabSubPanel.add("form data", formDataKindPanel);
-
-        
-        // set Json panel
-        JPanel jsonPanel = new JPanel(); // create new panel
-        jsonPanel.setLayout(new GridLayout(1, 1, 7, 7)); //set layout manager
-        jsonPanel.setBackground(backgroundColor); // set background color
-        jsonPanel.setOpaque(true); // apply color changes
-
-        JTextArea jsonTextArea = new JTextArea(); // creat new text area
-        jsonTextArea.setFont(jsonTextArea.getFont().deriveFont(15.0f)); // set text size
-        jsonPanel.add(jsonTextArea); // add text area
-
-        bodyTabSubPanel.add("JSON", jsonPanel); // add body panel
-    
-        
-
-        // set binary file panel
-        JPanel binaryFilePanel = new JPanel(); // create new panel
-        binaryFilePanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // set layout manager
-        binaryFilePanel.setBackground(backgroundColor); // set background color
-        binaryFilePanel.setOpaque(true); // apply color changes
-        bodyTabSubPanel.add("binary file", binaryFilePanel); // add binary file panel
-
-        JLabel choosenFileName = new JLabel("No file selected !"); // create new label
-        choosenFileName.setPreferredSize(new Dimension(500, 35)); // set size
-        choosenFileName.setFont(choosenFileName.getFont().deriveFont(14.0f)); // set text size
-        choosenFileName.setBackground(Color.WHITE); // set back ground color
-        choosenFileName.setOpaque(true); // apply color changes
-        binaryFilePanel.add(choosenFileName); // add to the binary file panel
-        
-        JButton resetChoosenFileButton = new JButton(" Reset file"); // create new button
-        resetChoosenFileButton.setPreferredSize(new Dimension(100, 35)); // set button size
-        resetChoosenFileButton.setBackground(backgroundColor); resetChoosenFileButton.setForeground(Color.RED);
-        resetChoosenFileButton.setOpaque(true); // apply color changes
-        binaryFilePanel.add(resetChoosenFileButton); // add to the binary file panel
-
-        JButton choosenFileButton = new JButton(" Choose file "); // create new button
-        choosenFileButton.setPreferredSize(new Dimension(105, 35)); // set button size
-        choosenFileButton.setBackground(backgroundColor); choosenFileButton.setForeground(Color.GREEN);
-        choosenFileButton.setOpaque(true); // apply color changes
-        binaryFilePanel.add(choosenFileButton); // add to the binary panel
-
-        
-
-       
-        // set Auth tab
-        {
-
-        // set Auth panel
-        JPanel authPanel = new JPanel(); // create new panel
-        authPanel.setLayout(new GridBagLayout()); // set layout manager
-        authPanel.setBackground(backgroundColor); // set background color
-        authPanel.setOpaque(true); // apply changes
-        GridBagConstraints gbc = new GridBagConstraints();
-        requestDetailsTabs.addTab("Auth", authPanel); // add auth panel
-
-        JLabel tokenLabel = new JLabel(" TOKEN "); // set text
-        tokenLabel.setMinimumSize(new Dimension(100, 40)); // set size
-        tokenLabel.setFont(tokenLabel.getFont().deriveFont(16.0f)); // set text size
-        tokenLabel.setBackground(backgroundColor); tokenLabel.setForeground(Color.WHITE);
-        tokenLabel.setOpaque(true); // apply color changes
-        gbc.gridx = gbc.gridy = 0;
-        authPanel.add(tokenLabel, gbc); // add to panel
-
-        JTextField getTokenTextField = new JTextField(); // create new text field
-        getTokenTextField.setFont(getTokenTextField.getFont().deriveFont(16.0f)); // set text size
-        getTokenTextField.setPreferredSize(new Dimension(100, 35)); // set size
-        gbc.weightx = 3; gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 1; gbc.gridy = 0;
-        authPanel.add(getTokenTextField, gbc); // add to the auth panel
-        gbc.fill = 0; gbc.weightx = 0;
-
-        JLabel prefixLabel = new JLabel(" PREFIX "); // set text
-        prefixLabel.setMinimumSize(new Dimension(100, 40)); // set size
-        prefixLabel.setFont(prefixLabel.getFont().deriveFont(16.0f)); // set text size
-        prefixLabel.setBackground(backgroundColor); prefixLabel.setForeground(Color.WHITE);
-        prefixLabel.setOpaque(true); // apply color changes
-        gbc.gridx = 0; gbc.gridy = 1; 
-        authPanel.add(prefixLabel, gbc); // add to panel
-
-        JTextField getPrefixTextField = new JTextField(); // create new text field
-        getPrefixTextField.setFont(getPrefixTextField.getFont().deriveFont(16.0f)); // set text size
-        getPrefixTextField.setPreferredSize(new Dimension(100, 35)); // set size
-        gbc.weightx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = gbc.gridy = 1;
-        authPanel.add(getPrefixTextField, gbc); // add to the auth panel
-        gbc.fill = 0; gbc.weightx = 0;
-
-        JLabel enabledLabel = new JLabel(" ENABLED "); // set text
-        enabledLabel.setMinimumSize(new Dimension(100, 40)); // set size
-        enabledLabel.setFont(enabledLabel.getFont().deriveFont(16.0f)); // set text size
-        enabledLabel.setBackground(backgroundColor); enabledLabel.setForeground(Color.WHITE);
-        enabledLabel.setOpaque(true); // apply color changes
-        gbc.gridx = 0; gbc.gridy = 2; 
-        authPanel.add(enabledLabel, gbc); // add to the auth panel
-
-        JRadioButton enabledCheckButton = new JRadioButton(); // creat new radio button
-        gbc.gridx = 1; gbc.gridy = 2; gbc.fill = GridBagConstraints.HORIZONTAL;
-        authPanel.add(enabledCheckButton, gbc); // add to the auth panel
-
-
-        JLabel space = new JLabel(); // create new label
-        space.setBackground(backgroundColor); // set background color
-        space.setOpaque(true); // apply color changes
-        gbc.weightx = gbc.weighty = 1; gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0; gbc.gridy = 3;
-        authPanel.add(space, gbc); // add to the auth panel
-        }
-
-
-
-        // set Query tab
-        {
-        
-        // set the Query Panel
-        JPanel queryPanel = new JPanel(); // create new panel
-        queryPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
-        queryPanel.setBackground(backgroundColor); // set background color
-        queryPanel.setOpaque(true); // apply color changes
-        requestDetailsTabs.add("Query", queryPanel); // add Query tab
-
-        JTextField getDataName = new JTextField("name...");
-        getDataName.setPreferredSize(new Dimension(224, 40));
-        JTextField getDataValue = new JTextField("value...");
-        getDataValue.setPreferredSize(new Dimension(224, 40));
-        JRadioButton selectButton = new JRadioButton();
-        selectButton.putClientProperty("JComponent.sizeVariant", "large");
-        SwingUtilities.updateComponentTreeUI(this);
-        JButton deletButton = new JButton("✘");
-        deletButton.setFont(deletButton.getFont().deriveFont(17.0f));
-        deletButton.setBackground(backgroundColor);
-        deletButton.setForeground(Color.RED);
-        deletButton.setOpaque(true);
-        deletButton.setPreferredSize(new Dimension(40, 40));
-
-        queryPanel.add(getDataName); queryPanel.add(getDataValue); 
-        queryPanel.add(selectButton); queryPanel.add(deletButton);
-
-        }
-
-
-
-        // set Header tab
-        {
-
-        // set the Header Panel
-        JPanel headerPanel = new JPanel(); // create new panel
-        headerPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // set layout manager
-        headerPanel.setBackground(backgroundColor); // set background color
-        headerPanel.setOpaque(true); // apply color changes
-        requestDetailsTabs.add("Header", headerPanel); // add Query tab
-
-        // JTextField getDataName = new JTextField("header...");
-        // getDataName.setPreferredSize(new Dimension(224, 40));
-        // JTextField getDataValue = new JTextField("value...");
-        // getDataValue.setPreferredSize(new Dimension(224, 40));
-        // JRadioButton selectButton = new JRadioButton();
-        // JButton deletButton = new JButton("✘");
-        // deletButton.setFont(deletButton.getFont().deriveFont(17.0f));
-        // deletButton.setBackground(backgroundColor);
-        // deletButton.setForeground(Color.RED);
-        // deletButton.setOpaque(true);
-        // deletButton.setPreferredSize(new Dimension(40, 40));
-
-        // headerPanel.add(getDataName); headerPanel.add(getDataValue); 
-        // headerPanel.add(selectButton); headerPanel.add(deletButton);
-
-        }
-    
+        // set header tab
+        headerTabGuiInit();
     }
 
 
@@ -313,10 +166,16 @@ public class NewRequestGUI extends JPanel
 
 
 
+    
+
+
+
+
             /*  Methods  */
 
+
     // This method set the north part of the new request details
-    private void urlPartINIT()
+    private void urlPartGuiInit()
     {
         // set the kind combo box
         requestKindComboBox.setPreferredSize(new Dimension(92, 50)); // set size 
@@ -374,8 +233,168 @@ public class NewRequestGUI extends JPanel
     }
 
 
+    // This method set the body tab of the new request 
+    private void bodyTabGuiInit()
+    {
+        // set body tab panel
+        bodyTabMainPanel.setBackground(backgroundColor); // set background color
+        bodyTabMainPanel.setOpaque(true); // apply color changes
+        bodyTabMainPanel.setLayout(new BoxLayout(bodyTabMainPanel, BoxLayout.Y_AXIS)); // set layout manager
+        requestDetailsTabs.add("Body", bodyTabMainPanel); // add body panel
 
 
+        
+        // set body kinds combo box
+        bodyKindsComboBox.setBackground(backgroundColor); // set background color
+        bodyKindsComboBox.setOpaque(true); // apply color changes
+        bodyKindsComboBox.addItem("Form data"); 
+        bodyKindsComboBox.addItem("JSON");
+        bodyKindsComboBox.addItem("Binary file");
+        bodyKindsComboBox.addActionListener(handler);
+        bodyTabMainPanel.add(bodyKindsComboBox); // add to tab panel
+       
+        
+
+        // set body kinds panel (CardLayout)
+        bodyTabSubPanel.setLayout(new CardLayout()); // set layout manager
+        bodyTabSubPanel.setBackground(backgroundColor); // set the background color
+        bodyTabSubPanel.setOpaque(true); // apply color changes
+        bodyTabMainPanel.add(bodyTabSubPanel); // add edit panel 
+        
+
+
+        // set the form data Panel
+        formDataKindPanel.setLayout(new BoxLayout(formDataKindPanel, BoxLayout.Y_AXIS)); // set layout manager
+        formDataKindPanel.setBackground(backgroundColor); // set background color
+        formDataKindPanel.setOpaque(true); // apply color changes
+        bodyTabSubPanel.add("f", formDataKindPanel); // add to edit panel
+
+
+        // set form data
+        formDatas.add(new NameValueData("new name ...", "new value ..."));
+        formDataKindPanel.add(formDatas.get(0));
+        
+
+
+
+        // set Json panel
+        jsonKindPanel.setLayout(new GridLayout(1, 1, 12, 12)); //set layout manager
+        jsonKindPanel.setBackground(backgroundColor); // set background color
+        jsonKindPanel.setOpaque(true); // apply color changes
+        bodyTabSubPanel.add("j", jsonKindPanel); // add to edit panel
+
+        // set Json text area
+        jsonTextArea.setFont(jsonTextArea.getFont().deriveFont(15.0f)); // set text size
+        jsonTextArea.setBorder(BorderFactory.createLineBorder(backgroundColor, 30));
+        jsonKindPanel.add(jsonTextArea); // add text area
+
+        
+    
+        
+        // set binary file panel
+        binaryFileKindPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // set layout manager
+        binaryFileKindPanel.setBackground(backgroundColor); // set background color
+        binaryFileKindPanel.setOpaque(true); // apply color changes
+        bodyTabSubPanel.add("b", binaryFileKindPanel); // add binary file panel
+
+        
+        // set choosen file label
+        choosenBinaryFileName.setPreferredSize(new Dimension(500, 35)); // set size
+        choosenBinaryFileName.setFont(choosenBinaryFileName.getFont().deriveFont(14.0f)); // set text size
+        choosenBinaryFileName.setBackground(Color.WHITE); // set back ground color
+        choosenBinaryFileName.setOpaque(true); // apply color changes
+        binaryFileKindPanel.add(choosenBinaryFileName); // add to the binary file panel
+        
+        
+        // set reset button
+        resetChoosenFileButton.setPreferredSize(new Dimension(100, 35)); // set button size
+        resetChoosenFileButton.setBackground(backgroundColor); resetChoosenFileButton.setForeground(Color.RED);
+        resetChoosenFileButton.setOpaque(true); // apply color changes
+        binaryFileKindPanel.add(resetChoosenFileButton); // add to the binary file panel
+
+        
+        // set choose button
+        chooseFileButton.setPreferredSize(new Dimension(105, 35)); // set button size
+        chooseFileButton.setBackground(backgroundColor); chooseFileButton.setForeground(Color.GREEN);
+        chooseFileButton.setOpaque(true); // apply color changes
+        binaryFileKindPanel.add(chooseFileButton); // add to the binary panel
+    }
+
+
+    // This method set the auth tab of the new requset
+    private void authTabGuiInit()
+    {
+        // set Auth panel
+        authTabPanel.setLayout(new BoxLayout(authTabPanel, BoxLayout.Y_AXIS)); // set layout manager
+        authTabPanel.setBackground(backgroundColor); // set background color
+        authTabPanel.setOpaque(true); // apply changes
+        requestDetailsTabs.addTab("Auth", authTabPanel); // add auth panel
+
+
+        // set token text field
+        getTokenTextField.setFont(getTokenTextField.getFont().deriveFont(16.0f)); // set text size
+        getTokenTextField.setForeground(backTextColor); // set text color
+        getTokenTextField.setOpaque(true); // apply color changes
+        getTokenTextField.setMaximumSize(new Dimension(920, 35)); // set size
+        authTabPanel.add(getTokenTextField); // add to the auth panel
+
+
+        // set prefix text field
+        getPrefixTextField.setFont(getPrefixTextField.getFont().deriveFont(16.0f)); // set text size
+        getPrefixTextField.setForeground(backTextColor); // set text color
+        getPrefixTextField.setOpaque(true); // apply color changes
+        getPrefixTextField.setMaximumSize(new Dimension(920, 35)); // set size
+        authTabPanel.add(getPrefixTextField); // add to the auth panel
+       
+
+        // set enabled check box
+        enabledCheckButton.putClientProperty("JComponent.sizeVariant", "large"); // set size
+        enabledCheckButton.setBackground(backgroundColor); // set background color
+        enabledCheckButton.setForeground(Color.GREEN); // set text color
+        enabledCheckButton.setOpaque(true); // apply color changes
+        authTabPanel.add(enabledCheckButton); // add to the auth panel
+    }
+
+
+    // This method set the query tab of the new request
+    private void queryTabGuiInit()
+    {
+        // set the Query Panel
+        queryTabPanel.setLayout(new BoxLayout(queryTabPanel, BoxLayout.Y_AXIS)); // set layout manager
+        queryTabPanel.setBackground(backgroundColor); // set background color
+        queryTabPanel.setOpaque(true); // apply color changes
+        requestDetailsTabs.add("Query", queryTabPanel); // add Query tab
+
+
+        // set Query datas
+        QueryDatas.add(new NameValueData("new name ...", "new value ..."));
+        queryTabPanel.add(QueryDatas.get(0));
+    }
+
+
+    // This method set the header tab of the new requset
+    private void headerTabGuiInit()
+    {
+        // set the Header Panel
+        headerTabPanel.setLayout(new BoxLayout(headerTabPanel, BoxLayout.Y_AXIS)); // set layout manager
+        headerTabPanel.setBackground(backgroundColor); // set background color
+        headerTabPanel.setOpaque(true); // apply color changes
+        requestDetailsTabs.add("Header", headerTabPanel); // add Query tab
+
+        // set Header datas
+        headerDatas.add(new NameValueData("new header ...", "new value ..."));
+        headerTabPanel.add(headerDatas.get(0));
+    }
+
+
+
+
+
+
+
+
+
+            /* inner Classes */
 
 
     // This class represnt to text fields and a select button and a delet button
@@ -448,6 +467,30 @@ public class NewRequestGUI extends JPanel
             deletButton.setForeground(Color.RED); // set text color
             deletButton.setOpaque(true); // apply color changes
             super.add(deletButton); // add to the panel
+        }
+    }
+
+
+
+
+    private class EventHandler implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) 
+        {
+            /*  body kinds combo box event handler */
+            if (e.getSource().equals(bodyKindsComboBox))
+            {
+                if (bodyKindsComboBox.getSelectedItem().equals("Form data"))
+                    ((CardLayout) bodyTabSubPanel.getLayout()).show(bodyTabSubPanel, "f");
+
+                else if (bodyKindsComboBox.getSelectedItem().equals("JSON"))
+                    ((CardLayout) bodyTabSubPanel.getLayout()).show(bodyTabSubPanel, "j");
+
+                else if (bodyKindsComboBox.getSelectedItem().equals("Binary file"))
+                    ((CardLayout) bodyTabSubPanel.getLayout()).show(bodyTabSubPanel, "b");
+            }
+
+            return;
         }
     }
 }
