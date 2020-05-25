@@ -25,7 +25,20 @@ public class Request implements Serializable
     private RequestKinds requestKind;
 
     // headers <header key, header value>
-    private HashMap<String, String> headers;
+    private HashMap<String, String> requestHeaders;
+
+
+
+    // response code
+    private int responseCode;
+
+    // response message
+    private String responseMessage;
+
+    // response headers
+    private HashMap<String, String> responseHeaders;
+
+    
 
     // serial version UID
     private static final long serialVersionUID = 2215266465311155162L;
@@ -58,10 +71,10 @@ public class Request implements Serializable
             serverUrl = new URL(url);
         }
         catch (MalformedURLException e){}
-        
+
 
         requestKind = RequestKinds.getKind(kind);
-        headers = new HashMap<>();
+        requestHeaders = new HashMap<>();
     }
 
 
@@ -77,7 +90,7 @@ public class Request implements Serializable
      */
     public Request(String requestGroup, String fileName) throws IOException, ClassNotFoundException
     {
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream(requestGroup + "/" + fileName + ".rqstdata"));
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream("./" + requestGroup + "/" + fileName + ".rqstdata"));
         Request file = (Request) in.readObject();
 
         this.requestName = fileName;
@@ -127,16 +140,16 @@ public class Request implements Serializable
     /** 
      * @return the value of given key
      */
-    public String getHeader(String key)
+    public String getRequestHeader(String key)
     {
-        return headers.get(key);
+        return requestHeaders.get(key);
     }
     /**
      * @return a {@code Set} of headers keys
      */
-    public Set<String> getHeadersKeys()
+    public Set<String> getrequestHeadersKeys()
     {
-        return headers.keySet();
+        return requestHeaders.keySet();
     }
     
 
@@ -150,7 +163,7 @@ public class Request implements Serializable
      */
     public void addHeader(String key, String value)
     {
-        headers.put(key, value);
+        requestHeaders.put(key, value);
     }
 
 
