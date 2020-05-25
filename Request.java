@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.5
+ * @version 0.0.7
  */
 public class Request implements Serializable
 {
@@ -38,7 +38,7 @@ public class Request implements Serializable
     // response headers
     private HashMap<String, String> responseHeaders;
 
-    
+
 
     // serial version UID
     private static final long serialVersionUID = 2215266465311155162L;
@@ -137,6 +137,13 @@ public class Request implements Serializable
     {
         return requestKind;
     }
+    /**
+     * @return a {@code Set} of headers keys
+     */
+    public Set<String> getrequestHeadersKeys()
+    {
+        return requestHeaders.keySet();
+    }
     /** 
      * @return the value of given key
      */
@@ -145,11 +152,32 @@ public class Request implements Serializable
         return requestHeaders.get(key);
     }
     /**
-     * @return a {@code Set} of headers keys
+     * @return response code of this request
      */
-    public Set<String> getrequestHeadersKeys()
+    public int getResponseCode() 
     {
-        return requestHeaders.keySet();
+        return responseCode;
+    }
+    /**
+     * @return response message of this request
+     */
+    public String getResponseMessage() 
+    {
+        return responseMessage;
+    }
+    /**
+     * @return a {@code Set} of response headers keys
+     */
+    public Set<String> getResponseHeaders() 
+    {
+        return responseHeaders.keySet();
+    }
+    /** 
+     * @return the value of given keyg
+     */
+    public String getResponseHeader(String key)
+    {
+        return responseHeaders.get(key);
     }
     
 
