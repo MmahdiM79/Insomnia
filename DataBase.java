@@ -10,7 +10,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.4
+ * @version 0.0.5
  */
 public class DataBase 
 {
@@ -43,6 +43,26 @@ public class DataBase
 
 
             /*  Methods  */
+
+
+    /**
+     * This method set the static fields of this class
+     * call this method at the first of the program (befor starting to use other methods of this class)
+     * (this method is like a constructor for this class)
+     */
+    public static void init()
+    {
+        File groups = new File(MAIN_FOLDER);
+
+
+        for (File group : groups.listFiles())
+        {
+            GROUPS_REQUESTS.put(group.getName(), new ArrayList<>());
+
+            for (File request : group.listFiles())
+                GROUPS_REQUESTS.get(group.getName()).add(request.getName().replaceAll(FORMAT, "")); 
+        }  
+    }
 
 
     /**
@@ -103,10 +123,11 @@ public class DataBase
         ObjectInputStream requestFile = new ObjectInputStream(new FileInputStream(new File(getPath(groupName, requestName))));
         
         
-        try { return (Request) requestFile.readObject();} 
+        try { return (Request) requestFile.readObject(); } 
         catch (ClassNotFoundException e) { return null; }
         finally { requestFile.close(); }
     }
+
 
 
 
