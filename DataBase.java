@@ -10,7 +10,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.3
+ * @version 0.0.4
  */
 public class DataBase 
 {
@@ -41,7 +41,9 @@ public class DataBase
 
 
 
+
             /*  Methods  */
+
 
     /**
      * This method save the given request in it's group
@@ -67,20 +69,43 @@ public class DataBase
         }   
 
         else
-        {
             GROUPS_REQUESTS.put(groupName.toLowerCase(), new ArrayList<>());
-            GROUPS_REQUESTS.get(groupName).add(requestName);
-        }       
-        
         
 
         ObjectOutputStream requestFile = new ObjectOutputStream(new FileOutputStream(new File(getPath(groupName, requestName))));
         requestFile.writeObject(request);
         requestFile.close();
         
-        
+        GROUPS_REQUESTS.get(groupName).add(requestName);
+
 
         return true;    
+    }
+
+
+    /**
+     * This method read a {@code Request} object from file
+     * 
+     * 
+     * @param groupName : name of the request group
+     * @param requestIndex : number of the request in group
+     * 
+     * @return your choosen {@code Request}
+     * 
+     * @throws IOException if can't open your choosen file
+     * @throws IndexOutOfBoundsException if you given an invalid request number
+     */
+    public static Request openRequest(String groupName, int requestIndex) 
+    throws IOException, IndexOutOfBoundsException
+    {
+        String requestName = GROUPS_REQUESTS.get(groupName).get(requestIndex);
+
+        ObjectInputStream requestFile = new ObjectInputStream(new FileInputStream(new File(getPath(groupName, requestName))));
+        
+        
+        try { return (Request) requestFile.readObject();} 
+        catch (ClassNotFoundException e) { return null; }
+        finally { requestFile.close(); }
     }
 
 
@@ -93,12 +118,12 @@ public class DataBase
     // this method check that a file is available or not
     private static boolean isFileAvailable(String groupName, String fileName)
     {
-        File groupFolder = new File(MAIN_FOLDER + "/" + groupName);
+        File groupFolder = new File(MAIN_FOLDER + groupName);
 
         for (File file : groupFolder.listFiles())
         {
             if (file.toString().replaceAll(FORMAT, "").equalsIgnoreCase(fileName))
-                return false;
+                return true;
         }
 
         return false;
