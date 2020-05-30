@@ -5,7 +5,7 @@
  * This enum reprsent HTTP requset kinds
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.2
+ * @version 0.1.3
  */
 public enum RequestKinds 
 {
@@ -14,6 +14,8 @@ public enum RequestKinds
     POST,
     PUT,
     DELET;
+
+
 
 
             /*  Methods  */
@@ -43,6 +45,36 @@ public enum RequestKinds
 
             case "DELET":
                 return DELET;
+
+            default:
+                return null;
+        }
+    }
+
+
+    /**
+     * This method return the {@code String} of given kind
+     * (a kind of {@code toString()} method)
+     * 
+     * 
+     * @param kind : kind of request
+     * @return a {@code String} that reprsent the given request kind 
+     */
+    public static String getKind(RequestKinds kind)
+    {
+        switch (kind)
+        {
+            case GET:
+                return "GET";
+            
+            case POST:
+                return "POST";
+
+            case PUT:
+                return "PUT";
+
+            case DELET:
+                return "DELET";
 
             default:
                 return null;
