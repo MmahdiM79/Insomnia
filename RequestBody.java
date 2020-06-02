@@ -58,12 +58,13 @@ public abstract class RequestBody
 
 
 
-
-    // this method close the app 
-    // use this method on errors
+    /**
+     * this method close the app 
+     * use this method on errors
+     */
     protected void error()
     {
-        System.out.println(" your given datas are invalid - ( check Jurl --help )");
+        System.out.println(" can't write on connectoin output stream - ( check Jurl --help )");
         System.exit(0);
     }
 }
