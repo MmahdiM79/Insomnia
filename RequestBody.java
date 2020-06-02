@@ -10,14 +10,17 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.2
+ * @version 0.1.3
  */
-public abstract class RequestBody 
+public abstract class RequestBody  implements Serializable
 {
-            /*  Field  */
-
+            /*  Fields  */
+      
     // hold connection output stream
-    protected BufferedOutputStream outputStream;
+    protected transient BufferedOutputStream outputStream;
+
+
+    private static final long serialVersionUID = 8483614136995L;
 
 
 
