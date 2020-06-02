@@ -10,7 +10,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.1
  */
 public abstract class RequestBody 
 {
@@ -55,4 +55,15 @@ public abstract class RequestBody
      * Thsi method set the request body
      */
     public abstract void set();
+
+
+
+
+    // this method close the app 
+    // use this method on errors
+    protected void error()
+    {
+        System.out.println(" your given datas are invalid - ( check Jurl --help )");
+        System.exit(0);
+    }
 }
