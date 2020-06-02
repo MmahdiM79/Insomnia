@@ -54,7 +54,7 @@ public abstract class RequestBody
     /**
      * Thsi method set the request body
      */
-    public abstract void set();
+    public abstract void set() throws IOException;
 
 
 
