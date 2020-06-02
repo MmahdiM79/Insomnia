@@ -66,7 +66,7 @@ public abstract class RequestBody
      */
     protected void error()
     {
-        System.out.println(" can not make body or write on connectoin output stream - ( check Jurl --help )");
+        System.out.println(" An error occurs while trying to set requset body - ( check Jurl --help )");
         System.exit(0);
     }
 }
