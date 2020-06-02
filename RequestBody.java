@@ -10,7 +10,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.1
+ * @version 0.1.2
  */
 public abstract class RequestBody 
 {
@@ -53,6 +53,8 @@ public abstract class RequestBody
 
     /**
      * Thsi method set the request body
+     * 
+     * @throws IOException if can't write on output stream
      */
     public abstract void set() throws IOException;
 
