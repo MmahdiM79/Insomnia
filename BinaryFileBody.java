@@ -9,9 +9,9 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.1
  */
-public class BinaryFileBody extends RequestBody implements Serializable
+public class BinaryFileBody extends RequestBody
 {
             /*  Fields  */
         
@@ -66,9 +66,6 @@ public class BinaryFileBody extends RequestBody implements Serializable
 
     /**
      * This method set the file as request body
-     * 
-     * 
-     * @throws IOException if can't write on given connoction output stream
      */
     public void set() throws IOException
     {
