@@ -13,9 +13,9 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.1
  */
-public class FormDataBody extends RequestBody implements Serializable
+public class FormDataBody extends RequestBody
 {
             /*  Fields */
 
@@ -101,9 +101,6 @@ public class FormDataBody extends RequestBody implements Serializable
 
     /**
      * This method set the form date of given key-values as connection body
-     * 
-     * 
-     * @throws IOException if can't write on given connection output stream
      */
     public void set() throws IOException
     {
