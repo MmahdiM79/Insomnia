@@ -10,7 +10,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.5
+ * @version 0.1.6
  */
 public abstract class RequestBody  implements Serializable
 {
@@ -18,6 +18,9 @@ public abstract class RequestBody  implements Serializable
       
     // hold connection output stream
     protected transient BufferedOutputStream outputStream;
+
+    // length of the body (byte)
+    private long Content_Length;
 
 
     private static final long serialVersionUID = 8483614136995L;
@@ -64,12 +67,22 @@ public abstract class RequestBody  implements Serializable
 
     /**
      * This method return the value of the 'Content-Type' header
+     * set a header to your request with key: "Content-Type",  and  value: 'output of this method'
      * 
      * @return a {@code String} that refers to Content-Type header
      */
-    public abstract String contentType();
+    public abstract String getContentType();
 
 
+    /**
+     * This method return the size of the request body in byte
+     * 
+     * @return a {@code long} that refers the body size in bytes
+     */
+    public long getContentLength()
+    {
+        return Content_Length;
+    }
 
 
 
