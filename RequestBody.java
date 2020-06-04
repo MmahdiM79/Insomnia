@@ -10,7 +10,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.1.5
  */
 public abstract class RequestBody  implements Serializable
 {
@@ -62,7 +62,18 @@ public abstract class RequestBody  implements Serializable
     public abstract void set() throws IOException;
 
 
+    /**
+     * This method return the value of the 'Content-Type' header
+     * 
+     * @return a {@code String} that refers to Content-Type header
+     */
+    public abstract String contentType();
 
+
+
+
+
+    
     /**
      * this method close the app 
      * use this method on errors
