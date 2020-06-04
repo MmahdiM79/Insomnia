@@ -11,13 +11,13 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.2
  */
 public class JsonBody extends RequestBody
 {
             /*  Fields  */
 
-     // Json String (body of request)
+    // Json String (body of request)
     private String jsonBodyString = null;
 
 
@@ -102,6 +102,15 @@ public class JsonBody extends RequestBody
     public void set() throws IOException
     {
         byte[] input = jsonBodyString.getBytes("utf-8");
+
+        super.Content_Length = input.length;
+
         outputStream.write(input, 0, input.length);           
+    }
+
+
+    public String getContentType()
+    {
+        return "application/json";
     }
 }
