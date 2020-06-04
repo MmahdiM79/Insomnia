@@ -10,7 +10,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.5
+ * @version 0.1.0
  */
 public class DataBase 
 {
@@ -20,7 +20,7 @@ public class DataBase
     private static final String MAIN_FOLDER = "./DataBase/";
 
     // save the request that dosen't belong to any group
-    private static final String LAST_REQUESTS_FOLDER = MAIN_FOLDER + "lastRequestsFolder/";
+    private static final String LAST_REQUESTS_FOLDER = "lastRequestsFolder/";
 
     // default name for files
     private static final String DEFAULT_FILE_NAME = "outputـ";
@@ -52,11 +52,18 @@ public class DataBase
      */
     public static void init()
     {
-        File groups = new File(MAIN_FOLDER);
+        File setDefaults = new File(MAIN_FOLDER + LAST_REQUESTS_FOLDER);
+        setDefaults.mkdirs();
 
+
+        File groups = new File(MAIN_FOLDER);
 
         for (File group : groups.listFiles())
         {
+            if (group.getName().equals(".DS_Store"))
+                continue;
+
+            System.out.println(group.toPath());
             GROUPS_REQUESTS.put(group.getName(), new ArrayList<>());
 
             for (File request : group.listFiles())
@@ -89,7 +96,10 @@ public class DataBase
         }   
 
         else
+        {
             GROUPS_REQUESTS.put(groupName.toLowerCase(), new ArrayList<>());
+            mkdir(groupName);
+        }
         
 
         ObjectOutputStream requestFile = new ObjectOutputStream(new FileOutputStream(new File(getPath(groupName, requestName))));
@@ -136,6 +146,7 @@ public class DataBase
 
 
 
+
     // this method check that a file is available or not
     private static boolean isFileAvailable(String groupName, String fileName)
     {
@@ -148,6 +159,14 @@ public class DataBase
         }
 
         return false;
+    }
+
+
+    // this method add the new group
+    private static void mkdir(String groupName)
+    {
+        File mkdir = new File(MAIN_FOLDER + groupName);
+        mkdir.mkdirs();
     }
 
 
