@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.Map.Entry;
 import java.io.*;
 
 
@@ -9,11 +8,12 @@ import java.io.*;
 /**
  * This class represent a form data body.
  * It holds the given key values and convert them to a form data body.
- * for use : first call {@link FormDataBody#build()} then call {@link FormDataBody#set()}
+ * for use : first call {@link FormDataBody#build()} then call {@link FormDataBody#set()}. 
+ * Use {@link FormDataBody#getContentType()} to set the Content-Type header
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.1
+ * @version 0.1.3
  */
 public class FormDataBody extends RequestBody
 {
@@ -27,7 +27,10 @@ public class FormDataBody extends RequestBody
     private HashMap<String, String> keyValues;
 
     // a boundary for this form data body
-    private String boundary;
+    private final String boundaryKey;
+
+    // final boundray for write on output stream
+    private final String boundary;
 
 
     private static final long serialVersionUID = 3231995008582149988L;
@@ -49,17 +52,18 @@ public class FormDataBody extends RequestBody
      * 
      * @param datas : a {@code String} of datas that you want to sent them in form data.
      *                 the given {@code String} should be in this form: "key=valu&key1=value1& ..."
-     * @param connectionOutputStream : your connection output stream   
-     * @param boundary : a boundary for this FormData body                                           
+     * @param connectionOutputStream : your connection output stream                                              
      */
-    public FormDataBody(String datas, OutputStream connectionOutputStream, String boundary)
+    public FormDataBody(String datas, OutputStream connectionOutputStream)
     {
         super(connectionOutputStream);
 
         
         this.datasString = datas;
         this.keyValues = new HashMap<>();
-        this.boundary = "--" + boundary + "\r\n";
+
+        boundaryKey = "Jurl-MmMmM-79--" + ((new Date()).getTime() / System.nanoTime());
+        this.boundary = "--" + boundaryKey + "\r\n";
     }
 
 
@@ -133,5 +137,15 @@ public class FormDataBody extends RequestBody
         outputStream.write(("--" + boundary + "--\r\n").getBytes());
         outputStream.flush();
         outputStream.close();
+    }
+
+
+    /**
+     * This method return the boundary of this form data body. 
+     * set a header to your request with key: "Content-Type",  and  value: 'output of this method'
+     */
+    public String getContentType()
+    {
+        return "multipart/form-data; boundary=" + boundaryKey;
     }
 }
