@@ -5,11 +5,13 @@ import java.io.*;
 
 /**
  * This class set a file to request body
- * for use : first call {@link BinaryFileBody#build()} then call {@link BinaryFileBody#set()}
+ * for use : first call {@link BinaryFileBody#build()} then call {@link BinaryFileBody#set()}. 
+ * Use {@link BinaryFileBody#getContentType()} and {@link BinaryFileBody#getContentLength()} to set the Content headers
+ * 
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.1
+ * @version 0.1.2
  */
 public class BinaryFileBody extends RequestBody
 {
@@ -70,8 +72,17 @@ public class BinaryFileBody extends RequestBody
     public void set() throws IOException
     {
         BufferedInputStream fileInputStream = new BufferedInputStream(bodyFile);
+
+        super.Content_Length = fileInputStream.readAllBytes().length;
         outputStream.write(fileInputStream.readAllBytes());
+
         outputStream.flush();
         outputStream.close();
+    }
+
+
+    public String getContentType()
+    {
+        return "application/octet-stream";
     }
 }
