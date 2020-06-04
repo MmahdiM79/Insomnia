@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.2
  */
 public class Request implements Serializable
 {
@@ -21,6 +21,9 @@ public class Request implements Serializable
 
 
 
+
+    // String of url
+    private final String urlString;
 
     // the request receiver
     private URL url = null;
@@ -43,9 +46,6 @@ public class Request implements Serializable
 
     // headers <header key, header value>
     private HashMap<String, String> requestHeaders = null; 
-
-    // query of the request
-    private HashMap<String, String> query = null;
 
     // follow redirect or not
     private boolean followRedirect = false;
@@ -71,6 +71,9 @@ public class Request implements Serializable
     private byte[] responseBody;
 
 
+
+    // check first send
+    private boolean check = true;
 
     // show in terminal or not
     private boolean terminalShow = true;
@@ -107,12 +110,11 @@ public class Request implements Serializable
         requestName = name;
         groupName = group;
 
+
         url = checkURL(url);
+        this.urlString = checkAndSetQuery(url, query);
         this.url = new URL(url);
 
-        if (query != null)
-            this.query = new HashMap<>();
-        buildQuery(query);
 
         requestKind = RequestKinds.GET;
 
@@ -210,7 +212,18 @@ public class Request implements Serializable
      */
     public void run()
     {
-        setQuery();
+        HttpURLConnection.setFollowRedirects(false);
+
+
+        if (check)
+        {
+            try{ url = new URL(urlString);}
+            catch(MalformedURLException e) {error('I');}
+            
+            check = false;
+        }
+        
+
 
         try{ connection = (HttpURLConnection) url.openConnection(); }
         catch (IOException e) { error('I'); }
@@ -218,32 +231,37 @@ public class Request implements Serializable
         try{ connection.setRequestMethod(RequestKinds.getKind(requestKind)); }
         catch (ProtocolException | SecurityException e) { return; }
         
-        HttpURLConnection.setFollowRedirects(false);
+        
 
 
         setHeaders();
 
 
         long startTime = System.nanoTime();
+
         try
         { 
             connection.connect();
             responseCode = connection.getResponseCode(); 
             responseMessage = connection.getResponseMessage();
             responseSize = connection.getContentLengthLong();
+            readResponseHeaders();
         }
         catch(IOException e) { error('I'); }
+
         long endTime = System.nanoTime();
 
         responseTime = endTime - startTime;
 
-        System.out.println(" at host: " + url.getHost() + url.getPath() + " |  response code" + responseCode);
+
 
         if (followRedirect && (responseCode/100 == 3))
         {
             String newUrl = connection.getHeaderField("Location");
+
             try { this.url = new URL(newUrl); }
-            catch (MalformedURLException e) {  }
+            catch (MalformedURLException e) { error('I'); }
+
             this.run(); 
         }
     }
@@ -269,7 +287,7 @@ public class Request implements Serializable
     public void saveToFile()
     {
         try { DataBase.saveRequest(groupName, requestName, this); }
-        catch (IOException e) { error('S'); }
+        catch (IOException e) { System.out.println(e.getMessage()); error('S'); }
     }
 
 
@@ -336,56 +354,34 @@ public class Request implements Serializable
     }
 
 
-    // set the Query of request
-    private void setQuery()
+    // this method check and set query
+    private String checkAndSetQuery(String url, String query)
     {
         if (query == null)
-            return;
+            return url;
 
-
-
-        String urlString = "http:/" + this.url.getPath();
-
-        urlString = urlString.concat("?");
-
-        for (String key : query.keySet())
-            urlString = urlString.concat(key + "=" + query.get(key) + "&");
-
-        urlString = urlString.substring(0, urlString.length()-1);
-        
-        
-        
-        try{ this.url = new URL(urlString); }
-        catch(MalformedURLException e) { System.out.println(" at setQuery: " + urlString); error('Q');}
-    }
-
-
-    // this method build query from given string
-    private void buildQuery(String query)
-    {
-        if (query == null)
-            return;
 
 
         String[] holdDatas = query.split("&");
-        
 
-        String key = null, value = null;
+        String key = null;
         for (String data : holdDatas)
         {
             try
             {
                 key = data.substring(0, data.indexOf('='));
-                value = data.substring(data.indexOf('=')+1);
 
                 if (key.length() == 0)
                     error('Q');
             }
             catch (IndexOutOfBoundsException e) { error('Q'); }
-
-
-            this.query.put(key, value);
         }
+
+
+        if (url.charAt(url.length()-1) != '/')
+            url = url.concat("/");
+
+        return url.concat("?").concat(query);
     }
 
 
