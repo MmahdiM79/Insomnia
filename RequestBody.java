@@ -76,6 +76,7 @@ public abstract class RequestBody  implements Serializable
 
     /**
      * This method return the size of the request body in byte
+     * set a header to your request with key: "Content-Length",  and  value: 'output of this method'
      * 
      * @return a {@code long} that refers the body size in bytes
      */
