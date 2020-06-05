@@ -6,12 +6,12 @@ import java.io.*;
 
 /**
  * This class build and set a JSON as requset body.
- * for use : first call {@link JsonBody#build()} then call {@link JsonBody#set()}.
- * 
+ * for use : first call {@link JsonBody#build()} then call {@link JsonBody#set(OutputStream)}.
+ * Use {@link JsonBody#getContentType()} and {@link JsonBody#getContentLength()} to set the Content headers
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.2
+ * @version 0.1.3
  */
 public class JsonBody extends RequestBody
 {
@@ -36,17 +36,14 @@ public class JsonBody extends RequestBody
 
 
     /**
-     * Create a new Json with given {@code String} and send it as request body to given connection output stream.
+     * Create a new Json with given {@code String}.
      * Your given {@code String} should be in this format: {"key": "value", "kay1": "value1", ...}
      * 
      * 
      * @param jsonBodyString : a {@code String} of Json datas to send it as request body
-     * @param connectionOutputStream : your connectoin output stream
      */
-    public JsonBody(String jsonBodyString, OutputStream connectionOutputStream)
+    public JsonBody(String jsonBodyString)
     {
-        super(connectionOutputStream);
-
         this.jsonBodyString = jsonBodyString;
     }
 
@@ -99,14 +96,15 @@ public class JsonBody extends RequestBody
     /**
      * This method set the given Json as requset body
      */
-    public void set() throws IOException
+    public void set(OutputStream connectionOutputStream) throws IOException
     {
         byte[] input = jsonBodyString.getBytes("utf-8");
 
         super.Content_Length = input.length;
 
-        outputStream.write(input, 0, input.length);           
+        connectionOutputStream.write(input, 0, input.length);           
     }
+
 
 
     public String getContentType()

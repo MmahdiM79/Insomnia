@@ -9,11 +9,11 @@ import java.io.*;
  * This class represent a form data body.
  * It holds the given key values and convert them to a form data body.
  * for use : first call {@link FormDataBody#build()} then call {@link FormDataBody#set()}. 
- * Use {@link FormDataBody#getContentType()} to set the Content-Type header
+ * Use {@link FormDataBody#getContentType()} and {@link FormDataBody#getContentLength()} to set the Content headers
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.1.4
  */
 public class FormDataBody extends RequestBody
 {
@@ -51,18 +51,14 @@ public class FormDataBody extends RequestBody
      * 
      * 
      * @param datas : a {@code String} of datas that you want to sent them in form data.
-     *                 the given {@code String} should be in this form: "key=valu&key1=value1& ..."
-     * @param connectionOutputStream : your connection output stream                                              
+     *                 the given {@code String} should be in this form: "key=valu&key1=value1& ..."                                              
      */
-    public FormDataBody(String datas, OutputStream connectionOutputStream)
+    public FormDataBody(String datas)
     {
-        super(connectionOutputStream);
-
-        
         this.datasString = datas;
         this.keyValues = new HashMap<>();
 
-        boundaryKey = "Jurl-MmMmM-79--" + ((new Date()).getTime() / System.nanoTime());
+        boundaryKey = "Jurl-MmMmM-79--" + ((new Date()).getTime() + System.nanoTime());
         this.boundary = "--" + boundaryKey + "\r\n";
     }
 
@@ -106,37 +102,57 @@ public class FormDataBody extends RequestBody
     /**
      * This method set the form date of given key-values as connection body
      */
-    public void set() throws IOException
+    public void set(OutputStream connectionOutputStream) throws IOException
     {
         for (String key : keyValues.keySet())
         {
-           try{ outputStream.write(boundary.getBytes()); }
+            try
+            { 
+               connectionOutputStream.write(boundary.getBytes()); 
+               super.Content_Length += boundary.getBytes().length;
+            }
            catch (IOException e) {System.out.println(" an IOException:" + e.getMessage()); error();}
+
 
            if (key.contains("(FILE)")) 
            {
-                outputStream.write(("Content-Disposition: form-data; filename=\"" + 
-                                   (new File(keyValues.get(key))).getName() + "\"\r\nContent-Type: Auto\r\n\r\n").getBytes());
+                connectionOutputStream.write(("Content-Disposition: form-data; filename=\"" + 
+                                        (new File(keyValues.get(key))).getName() + 
+                                            "\"\r\nContent-Type: Auto\r\n\r\n").getBytes());
+
+                super.Content_Length += ("Content-Disposition: form-data; filename=\"" + 
+                                            (new File(keyValues.get(key))).getName() + 
+                                                "\"\r\nContent-Type: Auto\r\n\r\n").getBytes().length;
 
 
                 try (BufferedInputStream tempBIS = new BufferedInputStream(new FileInputStream(new File(keyValues.get(key)))))
                 {
                     byte[] filesBytes = tempBIS.readAllBytes();
-                    outputStream.write(filesBytes);
-                    outputStream.write("\r\n".getBytes());
+                    super.Content_Length += filesBytes.length;
+                    connectionOutputStream.write(filesBytes);
+
+                    super.Content_Length += "\r\n".getBytes().length;
+                    connectionOutputStream.write("\r\n".getBytes());
                 } 
                 catch (IOException e) { error(); }
             } 
+
             else 
             {
-                outputStream.write(("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n").getBytes());
-                outputStream.write((keyValues.get(key) + "\r\n").getBytes());
+                super.Content_Length += ("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n").getBytes().length;
+                connectionOutputStream.write(("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n").getBytes());
+
+                super.Content_Length += (keyValues.get(key) + "\r\n").getBytes().length;
+                connectionOutputStream.write((keyValues.get(key) + "\r\n").getBytes());
             }
         }
 
-        outputStream.write(("--" + boundary + "--\r\n").getBytes());
-        outputStream.flush();
-        outputStream.close();
+    
+        super.Content_Length += ("--" + boundary + "--\r\n").getBytes().length;
+        connectionOutputStream.write(("--" + boundary + "--\r\n").getBytes());
+
+        connectionOutputStream.flush();
+        connectionOutputStream.close();
     }
 
 

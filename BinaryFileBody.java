@@ -5,13 +5,13 @@ import java.io.*;
 
 /**
  * This class set a file to request body
- * for use : first call {@link BinaryFileBody#build()} then call {@link BinaryFileBody#set()}. 
+ * for use : first call {@link BinaryFileBody#build()} then call {@link BinaryFileBody#set(OutputStream)}. 
  * Use {@link BinaryFileBody#getContentType()} and {@link BinaryFileBody#getContentLength()} to set the Content headers
  * 
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.2
+ * @version 0.1.3
  */
 public class BinaryFileBody extends RequestBody
 {
@@ -38,12 +38,9 @@ public class BinaryFileBody extends RequestBody
      * 
      * 
      * @param filePath : address of the file that you want to send it as your request body
-     * @param connectionOutputStream : your connection output stream
      */
-    public BinaryFileBody(String filePath, OutputStream connectionOutputStream)
+    public BinaryFileBody(String filePath)
     {
-        super(connectionOutputStream);
-
         this.filePath = filePath;
     } 
 
@@ -69,15 +66,15 @@ public class BinaryFileBody extends RequestBody
     /**
      * This method set the file as request body
      */
-    public void set() throws IOException
+    public void set(OutputStream connectionOutputStream) throws IOException
     {
         BufferedInputStream fileInputStream = new BufferedInputStream(bodyFile);
 
         super.Content_Length = fileInputStream.readAllBytes().length;
-        outputStream.write(fileInputStream.readAllBytes());
+        connectionOutputStream.write(fileInputStream.readAllBytes());
 
-        outputStream.flush();
-        outputStream.close();
+        connectionOutputStream.flush();
+        connectionOutputStream.close();
     }
 
 
