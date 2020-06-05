@@ -10,37 +10,18 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.6
+ * @version 0.1.7
  */
 public abstract class RequestBody  implements Serializable
 {
             /*  Fields  */
-      
-    // hold connection output stream
-    protected transient BufferedOutputStream outputStream;
 
     // length of the body (byte)
-    private long Content_Length;
+    protected long Content_Length = 0;
 
 
     private static final long serialVersionUID = 8483614136995L;
 
-
-
-
-
-
-          /* Constructor */
-
-    /**
-     * Create a new request body that will sent to given stream
-     * 
-     * @param connectionOutputStream : your connnection output stream
-     */      
-    public RequestBody(OutputStream connectionOutputStream)
-    {
-        this.outputStream = new BufferedOutputStream(connectionOutputStream);
-    }
 
 
 
@@ -60,9 +41,10 @@ public abstract class RequestBody  implements Serializable
     /**
      * Thsi method set the request body
      * 
+     * @param connectionOutputStream : output stream of your connectoin
      * @throws IOException if can't write on output stream
      */
-    public abstract void set() throws IOException;
+    public abstract void set(OutputStream connectionOutputStream) throws IOException;
 
 
     /**
