@@ -9,77 +9,77 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.2
+ * @version 0.1.4
  */
 public class Request implements Serializable
 {
             /*  Fields  */
 
-    private static final String USER_AGENT = " Jurl - Insomnia";
+    protected static final String USER_AGENT = " Jurl - Insomnia";
 
-    private static final String ACCEPT = "*/*";
+    protected static final String ACCEPT = "*/*";
 
 
 
 
     // String of url
-    private final String urlString;
+    protected final String urlString;
 
     // the request receiver
-    private URL url = null;
+    protected URL url = null;
 
     // connection of this request
-    private transient HttpURLConnection connection = null;
+    protected transient HttpURLConnection connection = null;
     
 
 
     // a name for this request (use as file name that this request will save in it)
-    private String requestName;
+    protected String requestName;
 
     // group name of this request
-    private String groupName;
+    protected String groupName;
 
 
 
     // kind of the request
-    private RequestKinds requestKind = RequestKinds.GET;
+    protected RequestKinds requestKind = RequestKinds.GET;
 
     // headers <header key, header value>
-    private HashMap<String, String> requestHeaders = null; 
+    protected HashMap<String, String> requestHeaders = null; 
 
     // follow redirect or not
-    private boolean followRedirect = false;
+    protected boolean followRedirect = false;
 
 
 
     // response code
-    private int responseCode;
+    protected int responseCode;
 
     // response message
-    private String responseMessage;
+    protected String responseMessage;
 
     // this.endTime - this.startTime
-    private long responseTime;
+    protected long responseTime;
 
     // size of the resposnse
-    private long responseSize;
+    protected long responseSize;
 
     // response headers
-    private HashMap<String, String> responseHeaders = new HashMap<>();
+    protected HashMap<String, String> responseHeaders = new HashMap<>();
 
     // body of the respose
-    private byte[] responseBody;
+    protected byte[] responseBody;
 
 
 
     // check first send
-    private boolean check = true;
+    protected boolean check = true;
 
     // show in terminal or not
-    private boolean terminalShow = true;
+    protected boolean terminalShow = true;
 
     // serial version UID
-    private static final long serialVersionUID = 2215266465311155162L;
+    protected static final long serialVersionUID = 2215266465311155162L;
 
   
     
@@ -100,7 +100,7 @@ public class Request implements Serializable
      * @param headers : a {@code String} of request headers in this format: "header:value;header1:value1; ..."
      * @param query : a {@code String} of request query in this format: "name=value&name1=value1& ..."
      * @param followRedirect : set it {@code true} if you want follow redirect
-     * @param terminalShow : Show the result on terminal or not
+     * @param terminalShow : show the result on terminal or not
      * 
      * @throws IOException make sure that given url has protocol and you are cannected to the internet 
      */
@@ -137,7 +137,19 @@ public class Request implements Serializable
 
             /*  Methods  */
 
+
+    // * setter mothods *
+
+    /**
+     * @param requestKind : set the method of this request
+     */
+    public void setRequestKind(String requestKind)
+    {
+        this.requestKind = RequestKinds.getKind(requestKind);
+    }
     
+
+
     // * getter methods *
 
     /**
@@ -295,8 +307,10 @@ public class Request implements Serializable
 
 
 
-    // this method set the headers of the request
-    private void setHeaders()
+    /**
+     * This method set the headers of the request
+     */
+    protected void setHeaders()
     {
         if (requestHeaders == null)
             return;
@@ -310,10 +324,14 @@ public class Request implements Serializable
     }
 
 
-    // this method fill requsetHeaders hashMap by given string
-    private void buildHeaders(String headers)
+    /**
+     * This method fill requsetHeaders hashMap by given string
+     * 
+     * @param headers : a {@code String} of headers
+     */
+    protected void buildHeaders(String headers)
     {
-        if (requestHeaders == null)
+        if (requestHeaders == null || headers.equals(""))
             return;
 
 
@@ -339,14 +357,16 @@ public class Request implements Serializable
     }
 
 
-    // this method read the response headers
-    private void readResponseHeaders()
+    /**
+     * This method read the response headers
+     */
+    protected void readResponseHeaders()
     {
-        responseHeaders.put("", connection.getHeaderField("null"));
+        responseHeaders.put("details", connection.getHeaderField(null));
 
         for (String key : connection.getHeaderFields().keySet())
         {
-            if (key.equals("null"))
+            if (key == null)
                 continue;
 
             responseHeaders.put(key, connection.getHeaderField(key));
@@ -354,8 +374,16 @@ public class Request implements Serializable
     }
 
 
-    // this method check and set query
-    private String checkAndSetQuery(String url, String query)
+    /**
+     * This method check and set query
+     * 
+     * 
+     * @param url : requset url
+     * @param query : a {@code String} of query
+     * 
+     * @return new url with query
+     */
+    protected String checkAndSetQuery(String url, String query)
     {
         if (query == null)
             return url;
@@ -385,8 +413,14 @@ public class Request implements Serializable
     }
 
 
-    // this method set the url protocol to http
-    private String checkURL(String url)
+    /**
+     * This method set the url protocol to http
+     * 
+     * 
+     * @param url : url of this request
+     * @return return url with protocol
+     */
+    protected String checkURL(String url)
     {
         if ((url.substring(0, 7)).equals("http://"))
             return url;
@@ -396,8 +430,12 @@ public class Request implements Serializable
     }
 
 
-    // for erros
-    private void error(char whichCase)
+    /**
+     * For erros
+     * 
+     * @param whichCase : which error?
+     */
+    protected void error(char whichCase)
     {
         switch (whichCase)
         {
@@ -421,6 +459,9 @@ public class Request implements Serializable
             break;
 
 
+            case 'B':
+                System.out.println(" Faild to set the body of this request - ( check Jurl --help )");
+            break;
 
             default:
             break;
