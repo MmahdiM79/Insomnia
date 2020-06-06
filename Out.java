@@ -11,7 +11,7 @@ import java.util.Date;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.6
+ * @version 0.1.7
  */
 public final class Out 
 {
@@ -161,6 +161,26 @@ public final class Out
 
 
     /**
+     * This method make a copy of respnse body in given file
+     * 
+     * @param where to save resposne body
+     */
+    public static void saveOutput(String where)
+    {
+        String outputFilePath = (where == null) ? DataBase.getAnOutputFilePath() : where;
+        File output = new File(outputFilePath);
+
+
+        try (BufferedInputStream responseBodyFile = new BufferedInputStream(new FileInputStream(DataBase.getResponseBodyGuiPath()));
+             BufferedOutputStream outputFile = new BufferedOutputStream(new FileOutputStream(output)))
+        {
+            outputFile.write(responseBodyFile.readAllBytes());
+        }
+        catch(IOException e){ Out.printErrors("output"); }
+    }
+
+
+    /**
      * This method prints the error messages.
      * 
      * <p>Error Cases: </p>
@@ -177,6 +197,7 @@ public final class Out
      *          'GET', 
      *          'noBodyKind', 
      *          'isDirectory'
+     *          'output'
      *      
      * 
      * @param whichCase : which error?
@@ -265,6 +286,11 @@ public final class Out
             break;
 
 
+            case "output":
+                ERRORS_LOG.println(" an error occurred when trying to write response body on given file for option --output");
+            break;
+
+
 
             default:
             break;
@@ -297,6 +323,7 @@ public final class Out
      *          'noBodyKind', 
      *          'noData', 
      *          'isDirectory'
+     *          'output'
      *          
      * 
      * 
