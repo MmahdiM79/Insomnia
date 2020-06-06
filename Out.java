@@ -11,7 +11,7 @@ import java.util.Date;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.5
  */
 public final class Out 
 {
@@ -82,8 +82,8 @@ public final class Out
         TIME_LINE.println("\n\n  ------ Request Details ------  \n");
 
 
-        TIME_LINE.println(RequestKinds.getKind(request.getRequestKind()) + "  " +
-                          request.getUrl().getFile() + "  " +
+        TIME_LINE.println(" " + RequestKinds.getKind(request.getRequestKind()) + " " +
+                          request.getUrl().getFile() + " " +
                           request.getUrl().getProtocol().toUpperCase() +
                           request.getResponseHeader("details").
                                             substring(request.getResponseHeader("details").indexOf('/'), 
@@ -151,39 +151,97 @@ public final class Out
      * 
      * <p>Error Cases: </p>
      *          'header', 
-     *          'internet',
-     *          'query',
-     *          'save',
-     *          'reqbody',
+     *          'internet', 
+     *          'query', 
+     *          'save', 
+     *          'reqbody', 
+     *          'invalidArg', 
+     *          'host', 
+     *          'twotime', 
+     *          'noEntery', 
+     *          'invalidMethod', 
+     *          'GET', 
+     *          'noBodyKind'
+     *      
      * 
-     * @param whichCase : which error e
+     * @param whichCase : which error?
+     * @param errorFactor : for some cases that need a addition message to show
      */
-    public static void printErrors(String whichCase)
+    public static void printErrors(String whichCase, String errorFactor)
     {
+        if (terminalCheck)
+            System.out.print("Jurl:  ");
+
+
         switch (whichCase)
         {
             case "header":
-                ERRORS_LOG.print(" Your given headers are invalid");
+                ERRORS_LOG.println(" Your given headers are invalid");
             break;
 
 
             case "internet":
-                ERRORS_LOG.print(" Faild to open connection");
+                ERRORS_LOG.println(" Faild to open connection");
             break;
 
 
             case "query":
-                ERRORS_LOG.print(" Your given Query is invalid");
+                ERRORS_LOG.println(" Your given Query is invalid");
             break;
 
 
             case "sava":
-                ERRORS_LOG.print(" Faild to save this request");
+                ERRORS_LOG.println(" Faild to save this request");
             break;
 
 
             case "reqBody":
-                ERRORS_LOG.print(" Faild to set the body of this request");
+                ERRORS_LOG.println(" Faild to set the body of this request");
+            break;
+
+
+            case "invalidArg":
+                ERRORS_LOG.println(" option " + errorFactor + ":  is unknown");
+            break;
+
+
+            case "host":
+                ERRORS_LOG.println(" Could not resolve host: " + errorFactor);
+            break;
+
+
+            case "twotime":
+                ERRORS_LOG.println(" You can't use " + errorFactor + " together");
+            break;
+
+
+            case "noEntery":
+                ERRORS_LOG.println(" option " + errorFactor + ": requires parameter");
+            break;
+
+
+            case "invalidMethod":
+                ERRORS_LOG.println(" Method " + errorFactor + ": is invalid");
+            break;
+
+
+            case "GET":
+                ERRORS_LOG.println(" can not send a body with GET method");
+            break;
+
+
+            case "invalidBodyKind":
+                ERRORS_LOG.println(" your given body kind is unknown");
+            break;
+
+
+            case "noBodyKind":
+                ERRORS_LOG.println(" Please set a kind for your given datas");
+            break;
+
+
+            case "noData":
+                ERRORS_LOG.println(" No given data for this request body");
             break;
 
 
@@ -195,10 +253,36 @@ public final class Out
 
         if (terminalCheck)
         {
-            ERRORS_LOG.print(" - ( check Jurl --help )\n");
+            ERRORS_LOG.print("Jurl:   try 'java Jurl --help' for more information\n");
             System.exit(0);
         }
         else
             ERRORS_LOG.print("\n");
+    }
+
+
+    /**
+     * A simple mode of {@link Out#printErrors(String, String)}.
+     * printErrors("example") is equal to printErrors("example", null).
+     * 
+     * <p> Error Cases: </p>
+     *          'header', 
+     *          'internet',
+     *          'query',
+     *          'save',
+     *          'reqbody',
+     *          'invalidArg',
+     *          'GET', 
+     *          'invalidBodyKind'
+     *          'noBodyKind', 
+     *          'noData'
+     *          
+     * 
+     * 
+     * @param whichCase : which error
+     */
+    public static void printErrors(String whichCase)
+    {
+        printErrors(whichCase, null);
     }
 }
