@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.4
+ * @version 0.2.0
  */
 public class Request implements Serializable
 {
@@ -76,7 +76,7 @@ public class Request implements Serializable
     protected boolean check = true;
 
     // show in terminal or not
-    protected boolean terminalShow = true;
+    protected boolean showResponseHeaders = true;
 
     // serial version UID
     protected static final long serialVersionUID = 2215266465311155162L;
@@ -100,11 +100,11 @@ public class Request implements Serializable
      * @param headers : a {@code String} of request headers in this format: "header:value;header1:value1; ..."
      * @param query : a {@code String} of request query in this format: "name=value&name1=value1& ..."
      * @param followRedirect : set it {@code true} if you want follow redirect
-     * @param terminalShow : show the result on terminal or not
+     * @param showResponseHeaders : show the result on terminal or not
      * 
      * @throws IOException make sure that given url has protocol and you are cannected to the internet 
      */
-    public Request(String name, String group, String url, String headers, String query, boolean followRedirect, boolean terminalShow) 
+    public Request(String name, String group, String url, String headers, String query, boolean followRedirect, boolean showResponseHeaders) 
             throws IOException
     {
         requestName = name;
@@ -123,7 +123,7 @@ public class Request implements Serializable
         buildHeaders(headers);
 
         this.followRedirect = followRedirect;
-        this.terminalShow = terminalShow;
+        this.showResponseHeaders = showResponseHeaders;
     }
 
 
@@ -155,67 +155,63 @@ public class Request implements Serializable
     /**
      * @return name of this request
      */
-    public String getRequestName() 
-    {
-        return requestName;
-    }
+    public String getRequestName() { return requestName; }
+
     /**
      * @return the url of this request
      */
-    public URL geturl() 
-    {
-        return url;
-    }
+    public URL getUrl() { return url; }
+
     /**
      * @return kind of this request
      */
-    public RequestKinds getRequestKind() 
-    {
-        return requestKind;
-    }
+    public RequestKinds getRequestKind() { return requestKind; }
+
     /**
      * @return a {@code Set} of headers keys
      */
-    public Set<String> getrequestHeadersKeys()
-    {
-        return requestHeaders.keySet();
+    public Set<String> getrequestHeadersKeys() 
+    { 
+        if (requestHeaders == null)
+            return null;
+
+        return requestHeaders.keySet(); 
     }
+
     /** 
      * @return the value of given key
      */
-    public String getRequestHeader(String key)
-    {
-        return requestHeaders.get(key);
+    public String getRequestHeader(String key) 
+    { 
+        if (requestHeaders != null)
+            return requestHeaders.get(key);
+
+        return null;
     }
+
     /**
      * @return response code of this request
      */
-    public int getResponseCode() 
-    {
-        return responseCode;
-    }
+    public int getResponseCode() { return responseCode; }
+
     /**
      * @return response message of this request
      */
-    public String getResponseMessage() 
-    {
-        return responseMessage;
-    }
+    public String getResponseMessage() { return responseMessage; }
+
     /**
      * @return a {@code Set} of response headers keys
      */
-    public Set<String> getResponseHeaders() 
-    {
-        return responseHeaders.keySet();
-    }
+    public Set<String> getResponseHeaders() { return responseHeaders.keySet(); }
+
     /** 
      * @return the value of given key
      */
-    public String getResponseHeader(String key)
-    {
-        return responseHeaders.get(key);
-    }
+    public String getResponseHeader(String key) { return responseHeaders.get(key); }
     
+
+
+
 
 
 
@@ -230,24 +226,22 @@ public class Request implements Serializable
         if (check)
         {
             try{ url = new URL(urlString);}
-            catch(MalformedURLException e) {error('I');}
-            
-            check = false;
+            catch(MalformedURLException e) {Out.printErrors("internet");}
         }
         
 
 
         try{ connection = (HttpURLConnection) url.openConnection(); }
-        catch (IOException e) { error('I'); }
+        catch (IOException e) { System.out.println('I'); }
         
         try{ connection.setRequestMethod(RequestKinds.getKind(requestKind)); }
         catch (ProtocolException | SecurityException e) { return; }
         
         
-
-
         setHeaders();
 
+
+       
 
         long startTime = System.nanoTime();
 
@@ -259,12 +253,20 @@ public class Request implements Serializable
             responseSize = connection.getContentLengthLong();
             readResponseHeaders();
         }
-        catch(IOException e) { error('I'); }
+        catch(IOException e) { System.out.println('I'); }
 
         long endTime = System.nanoTime();
 
         responseTime = endTime - startTime;
 
+
+        if (check)
+        {
+            Out.printRequestDetails(this);
+            check = false;
+        }
+        if (showResponseHeaders)
+            Out.printResponseDetails(this);
 
 
         if (followRedirect && (responseCode/100 == 3))
@@ -272,10 +274,15 @@ public class Request implements Serializable
             String newUrl = connection.getHeaderField("Location");
 
             try { this.url = new URL(newUrl); }
-            catch (MalformedURLException e) { error('I'); }
+            catch (MalformedURLException e) { System.out.println('I'); }
 
             this.run(); 
         }
+
+
+
+        try{ Out.printResponseBody(connection.getInputStream()); }
+        catch(IOException e){}
     }
 
 
@@ -299,7 +306,7 @@ public class Request implements Serializable
     public void saveToFile()
     {
         try { DataBase.saveRequest(groupName, requestName, this); }
-        catch (IOException e) { System.out.println(e.getMessage()); error('S'); }
+        catch (IOException e) { System.out.println(e.getMessage()); System.out.println('S'); }
     }
 
 
@@ -317,10 +324,13 @@ public class Request implements Serializable
 
 
         connection.setRequestProperty("User-Agent", USER_AGENT);
-        connection.setRequestProperty("Accept", ACCEPT);
+
 
         for (String key : requestHeaders.keySet())
             connection.setRequestProperty(key, requestHeaders.get(key));
+
+        if (!requestHeaders.keySet().contains("Accept"))
+            connection.setRequestProperty("Accept", ACCEPT);
     }
 
 
@@ -347,9 +357,9 @@ public class Request implements Serializable
                 value = data.substring(data.indexOf(':')+1);
 
                 if (value.length() == 0 || key.length() == 0)
-                    error('H');
+                    System.out.println('H');
             }
-            catch (IndexOutOfBoundsException e) { error('H'); }
+            catch (IndexOutOfBoundsException e) { System.out.println('H'); }
 
 
             requestHeaders.put(key, value);
@@ -400,9 +410,9 @@ public class Request implements Serializable
                 key = data.substring(0, data.indexOf('='));
 
                 if (key.length() == 0)
-                    error('Q');
+                    System.out.println('Q');
             }
-            catch (IndexOutOfBoundsException e) { error('Q'); }
+            catch (IndexOutOfBoundsException e) { System.out.println('Q'); }
         }
 
 
@@ -427,47 +437,5 @@ public class Request implements Serializable
 
 
         return "http://" + url;
-    }
-
-
-    /**
-     * For erros
-     * 
-     * @param whichCase : which error?
-     */
-    protected void error(char whichCase)
-    {
-        switch (whichCase)
-        {
-            case 'H':
-                System.out.println(" Your given headers are invalid - ( check Jurl --help )");
-            break;
-
-
-            case 'I':
-                System.out.println(" Faild to open connection - ( check your internet connection or Jurl --help )");
-            break;
-
-
-            case 'Q':
-                System.out.println(" Your given Query is invalid - ( check Jurl --help )");
-            break;
-
-
-            case 'S':
-                System.out.println(" Faild to save this request - ( check Jurl --help )");
-            break;
-
-
-            case 'B':
-                System.out.println(" Faild to set the body of this request - ( check Jurl --help )");
-            break;
-
-            default:
-            break;
-        }
-
-
-        System.exit(0);
     }
 }
