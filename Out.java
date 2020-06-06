@@ -11,7 +11,7 @@ import java.util.Date;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.5
+ * @version 0.1.6
  */
 public final class Out 
 {
@@ -54,20 +54,22 @@ public final class Out
 
         if (terminal)
         {
-            TIME_LINE = RESPONSE_HEADERS = RESPONSE_BODY = ERRORS_LOG = System.out;
+            TIME_LINE = RESPONSE_HEADERS = ERRORS_LOG = System.out;
         }
-
         else
         {
             try
             { 
                 TIME_LINE = new PrintStream(new File(DataBase.getTimeLineGuiPath()));
-                RESPONSE_HEADERS = new PrintStream(new File(DataBase.getResponseHeadersGuiPath()));
-                RESPONSE_BODY = new PrintStream(new File(DataBase.getResponseBodyGuiPath())); 
+                RESPONSE_HEADERS = new PrintStream(new File(DataBase.getResponseHeadersGuiPath())); 
                 ERRORS_LOG = new PrintStream(new File(DataBase.getErrorsLogGuiPath()));
             }
             catch(FileNotFoundException e) { System.out.println(e.getLocalizedMessage()); System.exit(0);}
         }
+
+
+        try { RESPONSE_BODY = new PrintStream(new File(DataBase.getResponseBodyGuiPath())); }
+        catch(FileNotFoundException e) { System.out.println(e.getLocalizedMessage()); System.exit(0);}
     }   
 
 
@@ -135,14 +137,26 @@ public final class Out
      * 
      * 
      * @param connectionInputStream : input stream of your connection
+     * @return size of the request body in kilo byte
+     * 
      * @throws IOException if can't read from given stream
      */
-    public static void printResponseBody(InputStream connectionInputStream) throws IOException
+    public static double printResponseBody(InputStream connectionInputStream) throws IOException
     {
         byte[] character = new byte[1];
 
-        while (connectionInputStream.read(character) != -1) 
+
+        while (connectionInputStream.read(character) != -1)
+        { 
             RESPONSE_BODY.print((char) (character[0]));
+
+            if (terminalCheck)
+                System.out.print((char) (character[0]));
+        }
+
+
+        File responseBodyFile = new File(DataBase.getResponseBodyGuiPath());
+        return responseBodyFile.length() / 1024f; 
     }
 
 
@@ -161,7 +175,8 @@ public final class Out
      *          'noEntery', 
      *          'invalidMethod', 
      *          'GET', 
-     *          'noBodyKind'
+     *          'noBodyKind', 
+     *          'isDirectory'
      *      
      * 
      * @param whichCase : which error?
@@ -176,27 +191,27 @@ public final class Out
         switch (whichCase)
         {
             case "header":
-                ERRORS_LOG.println(" Your given headers are invalid");
+                ERRORS_LOG.println(" your given headers are invalid");
             break;
 
 
             case "internet":
-                ERRORS_LOG.println(" Faild to open connection");
+                ERRORS_LOG.println(" failed to open connection");
             break;
 
 
             case "query":
-                ERRORS_LOG.println(" Your given Query is invalid");
+                ERRORS_LOG.println(" your given Query is invalid");
             break;
 
 
             case "sava":
-                ERRORS_LOG.println(" Faild to save this request");
+                ERRORS_LOG.println(" failed to save this request");
             break;
 
 
             case "reqBody":
-                ERRORS_LOG.println(" Faild to set the body of this request");
+                ERRORS_LOG.println(" failed to set the body of this request");
             break;
 
 
@@ -206,12 +221,12 @@ public final class Out
 
 
             case "host":
-                ERRORS_LOG.println(" Could not resolve host: " + errorFactor);
+                ERRORS_LOG.println(" could not resolve host: " + errorFactor);
             break;
 
 
             case "twotime":
-                ERRORS_LOG.println(" You can't use " + errorFactor + " together");
+                ERRORS_LOG.println(" you can't use " + errorFactor + " together");
             break;
 
 
@@ -221,7 +236,7 @@ public final class Out
 
 
             case "invalidMethod":
-                ERRORS_LOG.println(" Method " + errorFactor + ": is invalid");
+                ERRORS_LOG.println(" method " + errorFactor + ": is invalid");
             break;
 
 
@@ -236,12 +251,17 @@ public final class Out
 
 
             case "noBodyKind":
-                ERRORS_LOG.println(" Please set a kind for your given datas");
+                ERRORS_LOG.println(" please set a kind for your given datas");
             break;
 
 
             case "noData":
-                ERRORS_LOG.println(" No given data for this request body");
+                ERRORS_LOG.println(" no given data for this request body");
+            break;
+
+
+            case "isDirectory":
+                ERRORS_LOG.println(" your given path for option output is directory");
             break;
 
 
@@ -275,7 +295,8 @@ public final class Out
      *          'GET', 
      *          'invalidBodyKind'
      *          'noBodyKind', 
-     *          'noData'
+     *          'noData', 
+     *          'isDirectory'
      *          
      * 
      * 
