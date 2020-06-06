@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -10,7 +11,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.5
+ * @version 0.1.6
  */
 public class DataBase 
 {
@@ -41,8 +42,13 @@ public class DataBase
 
 
 
+    // outputs default folder
+    private static final String OUTPUTS_FOLDER = "./outputs";
+
     // default name for files
-    private static final String DEFAULT_FILE_NAME = "outputـ";
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "outputـ";
+
+
 
     // files format
     private static final String FORMAT = ".rqstdata";
@@ -89,12 +95,14 @@ public class DataBase
                 GROUPS_REQUESTS.get(group.getName()).add(request.getName().replaceAll(FORMAT, "")); 
         } 
         
+
+        File outputsFolder = new File(OUTPUTS_FOLDER);
+        outputsFolder.mkdirs();
         
 
 
         File guiFolder = new File(MAIN_FOLDER + GUI_FOLDER);
         guiFolder.mkdirs();
-
 
         FileOutputStream setFile;
         try
@@ -216,6 +224,15 @@ public class DataBase
     public static String getErrorsLogGuiPath()
     {
         return getPath(GUI_FOLDER, ERRORS_LOG);
+    }
+
+
+    /**
+     * @return path of a empty file for save an output of a request
+     */
+    public static String getAnOutputFilePath()
+    {
+        return getPath(OUTPUTS_FOLDER, DEFAULT_OUTPUT_FILE_NAME + (new Date()).toLocaleString().replaceAll(" ", "_") + ".txt");
     }
 
 
