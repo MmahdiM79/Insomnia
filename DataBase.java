@@ -10,17 +10,36 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.5
  */
 public class DataBase 
 {
             /*  Fields  */
 
+
     // main folder of store age
-    private static final String MAIN_FOLDER = "./DataBase/";
+    private static final String MAIN_FOLDER = "./.DataBase/";
 
     // save the request that dosen't belong to any group
-    private static final String LAST_REQUESTS_FOLDER = "lastRequestsFolder/";
+    private static final String LAST_REQUESTS_FOLDER = ".lastRequestsFolder";
+
+
+
+    // Gui files folder
+    private static final String GUI_FOLDER = ".GUI";
+    // time line file for GUI
+    private static final String TIME_LINE_GUI = ".timeline.data";
+
+    // time line file for GUI
+    private static final String RESPONSE_HEADERS = ".responseHeaders.data";
+    
+    // time line file for GUI
+    private static final String RESPONSE_BODY = ".responseBody.data";
+
+    // time line file for GUI
+    private static final String ERRORS_LOG = ".errorslog.data";
+
+
 
     // default name for files
     private static final String DEFAULT_FILE_NAME = "outputـ";
@@ -63,12 +82,36 @@ public class DataBase
             if (group.getName().equals(".DS_Store"))
                 continue;
 
-            System.out.println(group.toPath());
+
             GROUPS_REQUESTS.put(group.getName(), new ArrayList<>());
 
             for (File request : group.listFiles())
                 GROUPS_REQUESTS.get(group.getName()).add(request.getName().replaceAll(FORMAT, "")); 
-        }  
+        } 
+        
+        
+
+
+        File guiFolder = new File(MAIN_FOLDER + GUI_FOLDER);
+        guiFolder.mkdirs();
+
+
+        FileOutputStream setFile;
+        try
+        {
+            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, TIME_LINE_GUI)));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, RESPONSE_HEADERS)));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, RESPONSE_BODY)));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, ERRORS_LOG)));
+            setFile.close();
+        }
+        catch(IOException e){System.out.println(e.getStackTrace());} 
     }
 
 
@@ -106,6 +149,7 @@ public class DataBase
         requestFile.writeObject(request);
         requestFile.close();
         
+        System.out.println(groupName + "  ?????  " + requestName);
         GROUPS_REQUESTS.get(groupName).add(requestName);
 
 
@@ -136,6 +180,42 @@ public class DataBase
         try { return (Request) requestFile.readObject(); } 
         catch (ClassNotFoundException e) { return null; }
         finally { requestFile.close(); }
+    }
+
+
+    /**
+     * @return the path of time line gui file
+     */
+    public static String getTimeLineGuiPath()
+    {
+        return getPath(GUI_FOLDER, TIME_LINE_GUI);
+    }
+
+
+    /**
+     * @return the path of response Headers gui file
+     */
+    public static String getResponseHeadersGuiPath()
+    {
+        return getPath(GUI_FOLDER, RESPONSE_HEADERS);
+    }
+
+
+    /**
+     * @return the path of response body gui file
+     */
+    public static String getResponseBodyGuiPath()
+    {
+        return getPath(GUI_FOLDER, RESPONSE_BODY);
+    }
+
+
+    /**
+     * @return the path of errors log gui file
+     */
+    public static String getErrorsLogGuiPath()
+    {
+        return getPath(GUI_FOLDER, ERRORS_LOG);
     }
 
 
