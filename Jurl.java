@@ -13,7 +13,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.3
  */
 public class Jurl 
 {
@@ -23,7 +23,7 @@ public class Jurl
     private static ArrayList<String> args = new ArrayList<>();
 
     // app difined args
-    private static String[]  options =  {"-m", "--method",   // set kind of the request
+    private static String[]  options =  {"-m", "--method",   // set kind of the request 
                                          "-b", "--body",     // set kind of the request body
                                          "-h", "--headers",  // set headers of the request
                                          "-d", "--data",     // set datas for message body
@@ -81,7 +81,7 @@ public class Jurl
     public static void main(String[] inputs) throws IOException
     {
         getArgs(inputs);
-        
+        System.out.println(args.toString());
         if (args.contains("--GUI--"))
             terminal = false;
 
@@ -89,11 +89,11 @@ public class Jurl
         init();
 
         
-        url =args.get(0);
+        url = args.get(0);
         checkInputsAndSetFields();
 
 
-        if (requestBodyKind != null)
+        if (!method.equals("GET"))
             request = new RequestWithBody(name, 
                                           group, 
                                           url, 
@@ -107,6 +107,11 @@ public class Jurl
 
         else
             request = new Request(name, group, url, headers, query, followRedirect, showResponseHeaders);
+
+        
+
+        if (args.contains("-s") || args.contains("--save"))
+            request.saveToFile();
 
 
         request.run();
@@ -152,10 +157,7 @@ public class Jurl
                     Out.printErrors("invalidArg", arg);
 
         
-        if (!isUrlExist(args.get(0)))
-            Out.printErrors("host", args.get(0));
-
-
+        
         checkAndSetMethod();
         if (method.equals("get") && (args.contains("-d") || args.contains("--data")))
             Out.printErrors("GET");
@@ -168,13 +170,13 @@ public class Jurl
             followRedirect = true;
 
         
-        checkArg("-h", "--headers", headers);
+        headers = checkArg("-h", "--headers", true);
 
-        checkArg("-d", "--data", bodyDatas);
+        bodyDatas = checkArg("-d", "--data", true);
 
 
 
-        checkArg("-b", "--body", requestBodyKind);
+        requestBodyKind = checkArg("-b", "--body", true);
         if (requestBodyKind != null)
         {
             boolean isGivenKindValid = false;
@@ -195,9 +197,9 @@ public class Jurl
 
         
         
-        checkArg("-q", "--query", query);
+        query = checkArg("-q", "--query", true);
 
-
+        checkArg("-r", "--remove", false);
     }
 
     
@@ -214,24 +216,10 @@ public class Jurl
     }
 
 
-    // this method check that the given url is exist or not
-    private static boolean isUrlExist(String url)
-    {
-        try
-        {
-            InetAddress inetAddress = InetAddress.getByName(url);
-            return true;
-        }
-        catch (UnknownHostException exception)
-        {
-           return false;
-        }
-    }
-
-
     // this method check and set request method
     private static void checkAndSetMethod()
     {
+    
         if (!(args.contains("-m") || args.contains("--method")))
         {
             method = "GET";
@@ -252,8 +240,8 @@ public class Jurl
     }
 
 
-    // this method check that the users used a option true or not
-    private static void checkArg(String argShort, String argLong, String setEntery)
+    // this method check that the users used a option true or not and return the arg entery
+    private static String checkArg(String argShort, String argLong, Boolean setEntery)
     {
         if (args.contains(argShort) || args.contains(argLong))
         {
@@ -262,8 +250,11 @@ public class Jurl
             String usedArg = args.contains(argShort) ? argShort : argLong;
             checkHasEntery(usedArg);
 
-            setEntery = args.get(args.indexOf(usedArg)+1);
+            if (setEntery)
+                return args.get(args.indexOf(usedArg)+1);
         }
+
+        return null;
     }
 
 
