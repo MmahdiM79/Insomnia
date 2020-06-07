@@ -13,7 +13,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.1.4
  */
 public class Jurl 
 {
@@ -27,16 +27,17 @@ public class Jurl
                                          "-b", "--body",     // set kind of the request body
                                          "-h", "--headers",  // set headers of the request
                                          "-d", "--data",     // set datas for message body
-                                         "-i",               // show the response or not
-                                               "--help",     // open help text
-                                         "-f",               // follow redirect
                                          "-o", "--output",   // save response body to given file
                                          "-s", "--save",     // save request
                                          "-q", "--query",    // add a query to request
                                          "-u", "--upload",   // send a file as request body
                                          "-l", "--list",     // show the list of the request groups
-                                               "--send",     // send again the given requests
                                          "-r", "--remove",   // remove a request or group
+                                               "--send",     // send again the given requests
+                                               "--help",     // open help text
+                                         "-f",               // follow redirect
+                                         "-i",               // show the response or not
+
                                          "--GUI--"           // set the outputs to GUI
                                         }; 
 
@@ -80,11 +81,11 @@ public class Jurl
 
     public static void main(String[] inputs) throws IOException
     {
+        //String[] inputss = {"yahoo.com", "-i", "-o"};
         getArgs(inputs);
-        System.out.println(args.toString());
+       
         if (args.contains("--GUI--"))
             terminal = false;
-
 
         init();
 
@@ -115,6 +116,10 @@ public class Jurl
 
 
         request.run();
+
+
+        if (args.contains("-o") || args.contains("--output"))
+            Out.saveOutput(outputFileName, request.getResponseBodyFormat());
     }
 
 
@@ -200,12 +205,37 @@ public class Jurl
         query = checkArg("-q", "--query", true);
 
         checkArg("-r", "--remove", false);
+
+
+        if (args.contains("-o") || args.contains("--output"))
+        {
+            checkToTime("-o", "--output");
+
+            String usedArg = args.contains("-o") ? "-o" : "--output";
+
+
+            try { outputFileName = args.get(args.indexOf(usedArg)+1); }
+            catch (IndexOutOfBoundsException e) { outputFileName = null; }
+
+            if (isArgDefined(outputFileName))
+                outputFileName = null;
+        }
+        if (outputFileName != null)
+        {
+            File checkOutputFileName = new File(outputFileName);
+            if (!checkOutputFileName.isDirectory() && checkOutputFileName.getParent() != null)
+                Out.printErrors("outputNotExist");
+        }
     }
 
     
     // this method check that user given arg is defined or not
     private static boolean isArgDefined(String arg)
     {
+        if (arg == null)
+            return false;
+
+
         arg = arg.toLowerCase();
 
         for (String difinedArg : options)
@@ -248,10 +278,13 @@ public class Jurl
             checkToTime(argShort, argLong);
 
             String usedArg = args.contains(argShort) ? argShort : argLong;
-            checkHasEntery(usedArg);
+
 
             if (setEntery)
+            {
+                checkHasEntery(usedArg);
                 return args.get(args.indexOf(usedArg)+1);
+            }
         }
 
         return null;
