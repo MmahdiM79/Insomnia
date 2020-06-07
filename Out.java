@@ -11,7 +11,7 @@ import java.util.Date;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.7
+ * @version 0.1.8
  */
 public final class Out 
 {
@@ -165,11 +165,27 @@ public final class Out
      * 
      * @param where to save resposne body
      */
-    public static void saveOutput(String where)
+    public static void saveOutput(String where, String format)
     {
-        String outputFilePath = (where == null) ? DataBase.getAnOutputFilePath() : where;
-        File output = new File(outputFilePath);
+        format = (format == null) ? ".txt" : format;
 
+
+
+        String outputFilePath;
+
+
+        if (where == null)
+            outputFilePath = DataBase.getEmptyOutputFilePath(format);
+
+        else if ((new File(where)).getParent() == null)
+            outputFilePath = DataBase.getOuputsFolderPath() + where;
+
+        else 
+            outputFilePath = where;
+
+
+
+        File output = new File(outputFilePath);
 
         try (BufferedInputStream responseBodyFile = new BufferedInputStream(new FileInputStream(DataBase.getResponseBodyGuiPath()));
              BufferedOutputStream outputFile = new BufferedOutputStream(new FileOutputStream(output)))
@@ -196,7 +212,7 @@ public final class Out
      *          'invalidMethod', 
      *          'GET', 
      *          'noBodyKind', 
-     *          'isDirectory'
+     *          'outputNotExist'
      *          'output'
      *      
      * 
@@ -281,8 +297,8 @@ public final class Out
             break;
 
 
-            case "isDirectory":
-                ERRORS_LOG.println(" your given path for option output is directory");
+            case "outputNotExist":
+                ERRORS_LOG.println(" your given path for option output not exist");
             break;
 
 
@@ -322,7 +338,7 @@ public final class Out
      *          'invalidBodyKind'
      *          'noBodyKind', 
      *          'noData', 
-     *          'isDirectory'
+     *          'outputNotExist'
      *          'output'
      *          
      * 
