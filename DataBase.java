@@ -11,7 +11,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.6
+ * @version 0.1.7
  */
 public class DataBase 
 {
@@ -43,7 +43,7 @@ public class DataBase
 
 
     // outputs default folder
-    private static final String OUTPUTS_FOLDER = "./outputs";
+    private static final String OUTPUTS_FOLDER = "./outputs/";
 
     // default name for files
     private static final String DEFAULT_OUTPUT_FILE_NAME = "outputـ";
@@ -228,11 +228,22 @@ public class DataBase
 
 
     /**
+     * @return path of default outputs folder
+     */
+    public static String getOuputsFolderPath()
+    {
+        return OUTPUTS_FOLDER;
+    }
+
+
+    /**
+     * @param format : format of the output file
      * @return path of a empty file for save an output of a request
      */
-    public static String getAnOutputFilePath()
+    public static String getEmptyOutputFilePath(String format)
     {
-        return getPath(OUTPUTS_FOLDER, DEFAULT_OUTPUT_FILE_NAME + (new Date()).toLocaleString().replaceAll(" ", "_") + ".txt");
+        return OUTPUTS_FOLDER + DEFAULT_OUTPUT_FILE_NAME + 
+                (new Date()).toLocaleString().replaceAll(" ", "_").replaceAll(",", "") + format;
     }
 
 
