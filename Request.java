@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.1
  */
 public class Request implements Serializable
 {
@@ -67,8 +67,8 @@ public class Request implements Serializable
     // response headers
     protected HashMap<String, String> responseHeaders = new HashMap<>();
 
-    // body of the respose
-    protected byte[] responseBody;
+    // format of the response body
+    protected String responseBodyFormat = null;
 
 
 
@@ -208,7 +208,13 @@ public class Request implements Serializable
      * @return the value of given key
      */
     public String getResponseHeader(String key) { return responseHeaders.get(key); }
+
+    /**
+     * @return format of the response body
+     */
+    public String getResponseBodyFormat() { return responseBodyFormat; }
     
+
 
 
 
@@ -225,7 +231,7 @@ public class Request implements Serializable
 
         if (check)
         {
-            try{ url = new URL(urlString);}
+            try{ url = new URL(urlString); }
             catch(MalformedURLException e) {Out.printErrors("internet");}
         }
         
@@ -252,8 +258,9 @@ public class Request implements Serializable
             responseMessage = connection.getResponseMessage();
             responseSize = connection.getContentLengthLong();
             readResponseHeaders();
+            setResponseBodyFormat();
         }
-        catch(IOException e) { System.out.println('I'); }
+        catch(IOException e) { Out.printErrors("internet"); }
 
         long endTime = System.nanoTime();
 
@@ -281,8 +288,18 @@ public class Request implements Serializable
 
 
 
-        try{ Out.printResponseBody(connection.getInputStream()); }
-        catch(IOException e){}
+        if (connection.getErrorStream() != null)
+        {
+            try{ Out.printResponseBody(connection.getErrorStream()); }
+            catch(IOException e){}
+        }
+        else
+        {
+            try{ Out.printResponseBody(connection.getInputStream()); }
+            catch(IOException e){}
+        }
+
+        connection.disconnect();
     }
 
 
@@ -344,8 +361,8 @@ public class Request implements Serializable
         if (requestHeaders == null || headers.equals(""))
             return;
 
-
-        String[] holdDatas = headers.split(";");
+        
+        String[] holdDatas = headers.split(",");
         
 
         String key = null, value = null;
@@ -381,6 +398,20 @@ public class Request implements Serializable
 
             responseHeaders.put(key, connection.getHeaderField(key));
         }
+    }
+
+
+    protected void setResponseBodyFormat()
+    {
+        if (responseHeaders.get("Content-Type") == null)
+            return;
+
+        String type = responseHeaders.get("Content-Type");
+
+        if (type.contains(";"))
+            responseBodyFormat = "." + type.substring(type.indexOf('/')+1, type.indexOf(";"));
+        else
+            responseBodyFormat = "." + type.substring(type.indexOf('/')+1);
     }
 
 
