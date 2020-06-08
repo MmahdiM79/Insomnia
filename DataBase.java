@@ -7,11 +7,11 @@ import java.util.HashMap;
 
 
 /**
- * This class handle storing requests
+ * This class handle storing requests and files 
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.7
+ * @version 0.1.8
  */
 public class DataBase 
 {
@@ -22,12 +22,12 @@ public class DataBase
     private static final String MAIN_FOLDER = "./.DataBase/";
 
     // save the request that dosen't belong to any group
-    private static final String LAST_REQUESTS_FOLDER = ".lastRequestsFolder";
+    private static final String LAST_REQUESTS_FOLDER = ".lastRequestsFolder/";
 
 
 
     // Gui files folder
-    private static final String GUI_FOLDER = ".GUI";
+    private static final String GUI_FOLDER = "./.GUI/";
     // time line file for GUI
     private static final String TIME_LINE_GUI = ".timeline.data";
 
@@ -100,23 +100,22 @@ public class DataBase
         outputsFolder.mkdirs();
         
 
-
-        File guiFolder = new File(MAIN_FOLDER + GUI_FOLDER);
+        File guiFolder = new File(GUI_FOLDER);
         guiFolder.mkdirs();
 
         FileOutputStream setFile;
         try
         {
-            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, TIME_LINE_GUI)));
+            setFile = new FileOutputStream(new File(GUI_FOLDER + TIME_LINE_GUI));
             setFile.close();
 
-            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, RESPONSE_HEADERS)));
+            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_HEADERS));
             setFile.close();
 
-            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, RESPONSE_BODY)));
+            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_BODY));
             setFile.close();
 
-            setFile = new FileOutputStream(new File(getPath(GUI_FOLDER, ERRORS_LOG)));
+            setFile = new FileOutputStream(new File(GUI_FOLDER + ERRORS_LOG));
             setFile.close();
         }
         catch(IOException e){System.out.println(e.getStackTrace());} 
@@ -130,19 +129,20 @@ public class DataBase
      * @param groupName : name of the request group
      * @param requestName : a name for this request
      * @param request : request to save
+     * @param override : save file if there is a file with same name
      * 
      * @return {@code false} a same file with given name is available
      * 
      * @throws IOException if can't make file
      */
-    public static boolean saveRequest(String groupName, String requestName, Request request) throws IOException
+    public static boolean saveRequest(String groupName, String requestName, Request request, boolean override) throws IOException
     {
         if (groupName == null)
             groupName = LAST_REQUESTS_FOLDER;
 
         else if (GROUPS_REQUESTS.keySet().contains(groupName.toLowerCase()))
         {
-            if (isFileAvailable(groupName, requestName))
+            if (isFileAvailable(groupName, requestName) && !override)
                 return false;
         }   
 
@@ -157,9 +157,8 @@ public class DataBase
         requestFile.writeObject(request);
         requestFile.close();
         
-        System.out.println(groupName + "  ?????  " + requestName);
-        GROUPS_REQUESTS.get(groupName).add(requestName);
 
+        GROUPS_REQUESTS.get(groupName).add(requestName);
 
         return true;    
     }
@@ -169,7 +168,7 @@ public class DataBase
      * This method read a {@code Request} object from file
      * 
      * 
-     * @param groupName : name of the request group
+     * @param groupName : number of the request group
      * @param requestIndex : number of the request in group
      * 
      * @return your choosen {@code Request}
@@ -177,13 +176,25 @@ public class DataBase
      * @throws IOException if can't open your choosen file
      * @throws IndexOutOfBoundsException if you given an invalid request number
      */
-    public static Request openRequest(String groupName, int requestIndex) 
+    public static Request openRequest(int groupIndex, int requestIndex) 
     throws IOException, IndexOutOfBoundsException
     {
-        String requestName = GROUPS_REQUESTS.get(groupName).get(requestIndex);
+        String groupName = null; int cntr = 0;
+        for (String holdName : GROUPS_REQUESTS.keySet())
+        {
+            groupName = holdName;
 
-        ObjectInputStream requestFile = new ObjectInputStream(new FileInputStream(new File(getPath(groupName, requestName))));
-        
+            if (cntr == groupIndex)
+                break;
+
+            cntr++;
+        }
+        if (cntr != groupIndex)
+            throw new IndexOutOfBoundsException();
+
+
+        String requestName = GROUPS_REQUESTS.get(groupName).get(requestIndex);
+        ObjectInputStream requestFile = new ObjectInputStream(new FileInputStream(new File(getPath(groupName, requestName))));  
         
         try { return (Request) requestFile.readObject(); } 
         catch (ClassNotFoundException e) { return null; }
