@@ -11,7 +11,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.8
+ * @version 0.1.9
  */
 public class DataBase 
 {
@@ -257,6 +257,28 @@ public class DataBase
                 (new Date()).toLocaleString().replaceAll(" ", "_").replaceAll(",", "") + format;
     }
 
+
+    /**
+     * @return a copy of requests and their gruops hash map
+     */
+    public static HashMap<String, ArrayList<String>> getRequests()
+    {
+        HashMap<String, ArrayList<String>> output = new HashMap<>();
+
+        for (String groupName : GROUPS_REQUESTS.keySet())
+        {
+            ArrayList<String> copy = new ArrayList<>();
+
+            for (String requestName :  GROUPS_REQUESTS.get(groupName))
+                copy.add(requestName);
+
+
+            output.put(groupName, copy);
+        }
+
+
+        return output;
+    }
 
 
 
