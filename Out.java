@@ -1,5 +1,7 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 
 
@@ -11,7 +13,7 @@ import java.util.Date;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.8
+ * @version 0.1.9
  */
 public final class Out 
 {
@@ -64,12 +66,12 @@ public final class Out
                 RESPONSE_HEADERS = new PrintStream(new File(DataBase.getResponseHeadersGuiPath())); 
                 ERRORS_LOG = new PrintStream(new File(DataBase.getErrorsLogGuiPath()));
             }
-            catch(FileNotFoundException e) { System.out.println(e.getLocalizedMessage()); System.exit(0);}
+            catch(FileNotFoundException e) { printErrors("guiFiles"); }
         }
 
 
         try { RESPONSE_BODY = new PrintStream(new File(DataBase.getResponseBodyGuiPath())); }
-        catch(FileNotFoundException e) { System.out.println(e.getLocalizedMessage()); System.exit(0);}
+        catch(FileNotFoundException e) { printErrors("guiFiles"); }
     }   
 
 
@@ -173,7 +175,6 @@ public final class Out
 
         String outputFilePath;
 
-
         if (where == null)
             outputFilePath = DataBase.getEmptyOutputFilePath(format);
 
@@ -197,6 +198,65 @@ public final class Out
 
 
     /**
+     * This method show a list of requests in terminal
+     * 
+     * 
+     * @param requests : saved requests
+     */
+    public static void list(HashMap<String, ArrayList<String>> requests)
+    {
+        System.out.print("\n\n");
+
+        System.out.println(". Request Groups");
+        System.out.println("|\n|");
+
+
+
+        int groupNumber = 0; 
+        for (String group : requests.keySet())
+        {
+            System.out.println("|––––– " + groupNumber +": " + group + "\n|       |\n|       |");
+
+
+            int requestNumber = 0;
+            for (String request : requests.get(group))
+            {
+                Request holdForPrint = null;
+                try { holdForPrint = DataBase.openRequest(groupNumber, requestNumber); }
+                catch (IOException e) { System.out.println(e.getLocalizedMessage()); Out.printErrors("load"); }
+
+
+                System.out.print("|       |––––– " + requestNumber + ": ");
+
+                System.out.print("url: " + holdForPrint.getUrl() + " | ");
+                System.out.print("method: " + RequestKinds.getKind(holdForPrint.getRequestKind()) + " | ");
+                System.out.print("headers: { ");
+                    if (holdForPrint.getrequestHeadersKeys() != null)
+                        for (String key : holdForPrint.getrequestHeadersKeys())
+                            System.out.print(key + ": " + holdForPrint.getRequestHeader(key) + ", ");
+                    else
+                        System.out.print(" ");
+                System.out.print("\b\b } | ");
+                
+
+                if (holdForPrint instanceof RequestWithBody)
+                {
+                    RequestWithBody chengeType = (RequestWithBody) holdForPrint;
+
+                    System.out.print("content type: " + chengeType.getContentType() + " | ");
+                }
+
+                System.out.print("\n");
+                requestNumber++;
+            }
+
+            System.out.println("|\n|");
+            groupNumber++;
+        }
+    }
+
+
+    /**
      * This method prints the error messages.
      * 
      * <p>Error Cases: </p>
@@ -212,8 +272,11 @@ public final class Out
      *          'invalidMethod', 
      *          'GET', 
      *          'noBodyKind', 
-     *          'outputNotExist'
-     *          'output'
+     *          'outputNotExist', 
+     *          'output', 
+     *          'load', 
+     *          'guiFiles'
+     * 
      *      
      * 
      * @param whichCase : which error?
@@ -242,7 +305,7 @@ public final class Out
             break;
 
 
-            case "sava":
+            case "save":
                 ERRORS_LOG.println(" failed to save this request");
             break;
 
@@ -307,6 +370,16 @@ public final class Out
             break;
 
 
+            case "load":
+                ERRORS_LOG.println(" an error occurued when trying to load saved files");
+            break;
+
+
+            case "guiFiles":
+                ERRORS_LOG.println(" can not open GUI defalt files");
+            break;
+
+
 
             default:
             break;
@@ -338,8 +411,10 @@ public final class Out
      *          'invalidBodyKind'
      *          'noBodyKind', 
      *          'noData', 
-     *          'outputNotExist'
-     *          'output'
+     *          'outputNotExist', 
+     *          'output', 
+     *          'load', 
+     *          'guiFiles'
      *          
      * 
      * 
