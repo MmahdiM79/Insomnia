@@ -207,7 +207,7 @@ public class DataBase
      */
     public static String getTimeLineGuiPath()
     {
-        return getPath(GUI_FOLDER, TIME_LINE_GUI);
+        return GUI_FOLDER + TIME_LINE_GUI;
     }
 
 
@@ -216,7 +216,7 @@ public class DataBase
      */
     public static String getResponseHeadersGuiPath()
     {
-        return getPath(GUI_FOLDER, RESPONSE_HEADERS);
+        return GUI_FOLDER + RESPONSE_HEADERS;
     }
 
 
@@ -225,7 +225,7 @@ public class DataBase
      */
     public static String getResponseBodyGuiPath()
     {
-        return getPath(GUI_FOLDER, RESPONSE_BODY);
+        return GUI_FOLDER + RESPONSE_BODY;
     }
 
 
@@ -234,7 +234,7 @@ public class DataBase
      */
     public static String getErrorsLogGuiPath()
     {
-        return getPath(GUI_FOLDER, ERRORS_LOG);
+        return GUI_FOLDER + ERRORS_LOG;
     }
 
 
