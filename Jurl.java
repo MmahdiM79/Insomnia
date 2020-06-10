@@ -13,7 +13,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.7
+ * @version 0.1.9
  */
 public class Jurl 
 {
@@ -137,6 +137,9 @@ public class Jurl
 
         checkInputsAndSetFields();
 
+        if (args.contains("-s") || args.contains("--save"))
+            saveOption();
+
 
         if (!method.equals("GET"))
             request = new RequestWithBody(name, 
@@ -156,7 +159,7 @@ public class Jurl
         
 
         if (args.contains("-s") || args.contains("--save"))
-            saveOption();
+            request.saveToFile();
 
 
         request.run();
@@ -164,6 +167,10 @@ public class Jurl
 
         if (args.contains("-o") || args.contains("--output"))
             Out.saveOutput(outputFileName, request.getResponseBodyFormat());
+
+
+        if (args.contains("--send"))
+            sendOption();
     }
 
 
@@ -223,73 +230,41 @@ public class Jurl
 
         bodyDatas = checkArg("-d", "--data", true);
 
- 
         query = checkArg("-q", "--query", true);
 
-
-        if (args.contains("-o") || args.contains("--output"))
-        {
-            checkToTime("-o", "--output");
-
-            String usedArg = args.contains("-o") ? "-o" : "--output";
-
-
-            try { outputFileName = args.get(args.indexOf(usedArg)+1); }
-            catch (IndexOutOfBoundsException e) { outputFileName = null; }
-
-            if (isArgDefined(outputFileName))
-                outputFileName = null;
-        }
-        if (outputFileName != null)
-        {
-            File checkOutputFileName = new File(outputFileName);
-            if (!checkOutputFileName.isDirectory() && checkOutputFileName.getParent() != null)
-                Out.printErrors("outputNotExist");
-        }
+        outputFileName = checkArg("-o", "--output", true);
     }
 
 
-    // this method handel the remove option
+    // this method handle the remove option
     private static void removeOption()
     {
         String selectedArg = args.contains("rm") ? "rm" : "--remove";
+        checkHasEntery(selectedArg);
+
+        String rmCode = args.get(args.indexOf(selectedArg)+1);
+        
+        if (rmCode.length() == 2)
+            DataBase.removeRequest(rmCode);
+        else
+            DataBase.removeGroup(rmCode);
+    }
 
 
-        ArrayList<String> rmEntries = new ArrayList<>();
-        for (int i = args.indexOf(selectedArg)+1; i < args.size(); i++)
+    // check the save option and handle it
+    private static void saveOption()
+    {
+        String selectedArg = args.contains("-s") ? "-s" : "--save";
+        checkHasEntery(selectedArg);
+
+
+        if (!isArgDefined(args.get(args.indexOf(selectedArg)+2)))
         {
-            if (!isArgDefined(args.get(i)))
-            {
-                if (args.get(i).length() > 2)
-                    Out.printErrors("badEntry", selectedArg);
-
-
-                int removeCode;
-                try { removeCode = Integer.parseInt(args.get(i)); }
-                catch (NumberFormatException e) { Out.printErrors("badEntry", selectedArg); }
-
-                rmEntries.add(args.get(i));
-            }
-
-            else if (rmEntries.size() == 0)
-                Out.printErrors("noEntery", selectedArg);
+            group = args.get(args.indexOf(selectedArg)+1);
+            name = args.get(args.indexOf(selectedArg)+2);
         }
-
-
-        for (String code : rmEntries)
-        {
-            if (code.length() == 2)
-            {
-                try{ DataBase.removeRequest(code); }
-                catch (IndexOutOfBoundsException e) { Out.printErrors("badEntery", selectedArg); }
-            }
-            else
-            {
-                try{ DataBase.removeGroup(code); }
-                catch (IndexOutOfBoundsException e) { Out.printErrors("badEntery", selectedArg); }
-            }
-        }
-                
+        else
+            name = args.get(args.indexOf(selectedArg)+1);
     }
 
     
