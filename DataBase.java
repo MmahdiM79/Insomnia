@@ -1,4 +1,6 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +13,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.9
+ * @version 0.2.0
  */
 public class DataBase 
 {
@@ -57,6 +59,10 @@ public class DataBase
     private static final HashMap<String, ArrayList<String>> GROUPS_REQUESTS = new HashMap<>();
 
 
+    // override files for save or not
+    private static boolean OVERRIDE = false;
+
+
 
 
 
@@ -81,6 +87,9 @@ public class DataBase
         setDefaults.mkdirs();
 
 
+
+                /*  read request groups and requests */
+
         File groups = new File(MAIN_FOLDER);
 
         for (File group : groups.listFiles())
@@ -96,12 +105,18 @@ public class DataBase
         } 
         
 
+        // set output folder
         File outputsFolder = new File(OUTPUTS_FOLDER);
         outputsFolder.mkdirs();
         
 
+        // set gui folder
         File guiFolder = new File(GUI_FOLDER);
         guiFolder.mkdirs();
+
+        
+
+                /*  set GUI files  */
 
         FileOutputStream setFile;
         try
@@ -118,7 +133,7 @@ public class DataBase
             setFile = new FileOutputStream(new File(GUI_FOLDER + ERRORS_LOG));
             setFile.close();
         }
-        catch(IOException e){System.out.println(e.getStackTrace());} 
+        catch(IOException e){ Out.printErrors("guiFiles"); } 
     }
 
 
@@ -129,20 +144,19 @@ public class DataBase
      * @param groupName : name of the request group
      * @param requestName : a name for this request
      * @param request : request to save
-     * @param override : save file if there is a file with same name
      * 
      * @return {@code false} a same file with given name is available
      * 
      * @throws IOException if can't make file
      */
-    public static boolean saveRequest(String groupName, String requestName, Request request, boolean override) throws IOException
+    public static boolean saveRequest(String groupName, String requestName, Request request) throws IOException
     {
         if (groupName == null)
-            groupName = LAST_REQUESTS_FOLDER;
+            groupName = LAST_REQUESTS_FOLDER.replace("/", "");
 
         else if (GROUPS_REQUESTS.keySet().contains(groupName.toLowerCase()))
         {
-            if (isFileAvailable(groupName, requestName) && !override)
+            if (isFileAvailable(groupName, requestName) && !OVERRIDE)
                 return false;
         }   
 
@@ -151,6 +165,9 @@ public class DataBase
             GROUPS_REQUESTS.put(groupName.toLowerCase(), new ArrayList<>());
             mkdir(groupName);
         }
+
+        if (requestName == null)
+            requestName = "request_" + GROUPS_REQUESTS.get(groupName).size();
         
 
         ObjectOutputStream requestFile = new ObjectOutputStream(new FileOutputStream(new File(getPath(groupName, requestName))));
@@ -179,18 +196,7 @@ public class DataBase
     public static Request openRequest(int groupIndex, int requestIndex) 
     throws IOException, IndexOutOfBoundsException
     {
-        String groupName = null; int cntr = 0;
-        for (String holdName : GROUPS_REQUESTS.keySet())
-        {
-            groupName = holdName;
-
-            if (cntr == groupIndex)
-                break;
-
-            cntr++;
-        }
-        if (cntr != groupIndex)
-            throw new IndexOutOfBoundsException();
+        String groupName = getGroupName(groupIndex);
 
 
         String requestName = GROUPS_REQUESTS.get(groupName).get(requestIndex);
@@ -199,6 +205,51 @@ public class DataBase
         try { return (Request) requestFile.readObject(); } 
         catch (ClassNotFoundException e) { return null; }
         finally { requestFile.close(); }
+    }
+
+
+    /**
+     * This method remove a request from group
+     * 
+     * 
+     * @param requestCode : a {@code String} with length 2 that rfers to a 2 digit {@code int}.
+     * @throws IndexOutOfBoundsException if your given string dosn't refer to specific request
+     */
+    public static void removeRequest(String requestCode) throws IndexOutOfBoundsException
+    {
+        int groupNumber = requestCode.charAt(0) - '0';
+        int requestNumber = requestCode.charAt(1) - '0';
+
+        String requestFile = getPath(getGroupName(groupNumber), 
+                                     GROUPS_REQUESTS.get(getGroupName(groupNumber)).get(requestNumber));
+
+        File fileToRemove = new File(requestFile);
+        
+        try { Files.deleteIfExists(Paths.get(fileToRemove.getAbsolutePath())); }
+        catch (IOException e) { Out.printErrors("cantRemove"); }
+
+
+        GROUPS_REQUESTS.get(getGroupName(groupNumber)).remove(requestNumber);
+    }
+
+
+    public static void removeGroup(String groupCode)
+    {
+        String groupName = getGroupName(groupCode.charAt(0) - '0');
+
+
+        int groupSize = GROUPS_REQUESTS.get(groupName).size();
+        for (int i = 0; i < groupSize; i++)
+            removeRequest(groupCode + '0');
+
+        
+        File directoryToRemove = new File(MAIN_FOLDER + groupName + '/');
+        
+        try { Files.deleteIfExists(Paths.get(directoryToRemove.getAbsolutePath())); }
+        catch (IOException e) { Out.printErrors("cantRemoveD"); }
+
+
+        GROUPS_REQUESTS.remove(groupName);
     }
 
 
@@ -281,11 +332,42 @@ public class DataBase
     }
 
 
+    /**
+     * If you set the override {@code true}, method {@link DataBase#saveRequest(String, String, Request)}
+     *    will save the given file anyway.
+     * 
+     * @param override
+     */
+    public static void setOverride(boolean override)
+    {
+        OVERRIDE = override;
+    }
 
 
 
 
 
+
+
+
+    // this method find the group name with its indes
+    private static String getGroupName(int groupIndex) throws IndexOutOfBoundsException
+    {
+        String groupName = null; int cntr = 0;
+        for (String holdName : GROUPS_REQUESTS.keySet())
+        {
+            groupName = holdName;
+
+            if (cntr == groupIndex)
+                break;
+
+            cntr++;
+        }
+        if (cntr != groupIndex)
+            throw new IndexOutOfBoundsException();
+
+        return groupName;
+    }
 
 
     // this method check that a file is available or not
