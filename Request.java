@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.1
+ * @version 0.3.0
  */
 public class Request implements Serializable
 {
@@ -97,7 +97,7 @@ public class Request implements Serializable
      * @param name : a name for this request
      * @param group : name of the this request group
      * @param url : url for send this requst
-     * @param headers : a {@code String} of request headers in this format: "header:value;header1:value1; ..."
+     * @param headers : a {@code String} of request headers in this format: "header:value,header1:value1, ..."
      * @param query : a {@code String} of request query in this format: "name=value&name1=value1& ..."
      * @param followRedirect : set it {@code true} if you want follow redirect
      * @param showResponseHeaders : show the result on terminal or not
@@ -107,20 +107,25 @@ public class Request implements Serializable
     public Request(String name, String group, String url, String headers, String query, boolean followRedirect, boolean showResponseHeaders) 
             throws IOException
     {
+        // set name and group
         requestName = name;
         groupName = group;
 
 
+        // set url and query
         url = checkURL(url);
         this.urlString = checkAndSetQuery(url, query);
         this.url = new URL(url);
 
 
+        // set request method
         requestKind = RequestKinds.GET;
 
-        if (headers != null)
-            requestHeaders = new HashMap<>();
+
+        // set requst headers
+        requestHeaders = new HashMap<>();
         buildHeaders(headers);
+
 
         this.followRedirect = followRedirect;
         this.showResponseHeaders = showResponseHeaders;
@@ -213,6 +218,27 @@ public class Request implements Serializable
      * @return format of the response body
      */
     public String getResponseBodyFormat() { return responseBodyFormat; }
+
+    /**
+     * @return time of resopnse to this request (ms)
+     */
+    public long getResponseTime() { return responseTime; }
+
+    /**
+     * @return {@code true} if this request follows redirects
+     */
+    public boolean isFollowRedirects()
+    {
+        return followRedirect;
+    }
+
+    /**
+     * @return {@code true} if this request shows response headers 
+     */
+    public boolean isShowResponseHeaders()
+    {
+        return showResponseHeaders;
+    }
     
 
 
@@ -229,6 +255,7 @@ public class Request implements Serializable
         HttpURLConnection.setFollowRedirects(false);
 
 
+        // for first time
         if (check)
         {
             try{ url = new URL(urlString); }
@@ -238,7 +265,7 @@ public class Request implements Serializable
 
 
         try{ connection = (HttpURLConnection) url.openConnection(); }
-        catch (IOException e) { System.out.println('I'); }
+        catch (IOException e) { Out.printErrors("internet"); }
         
         try{ connection.setRequestMethod(RequestKinds.getKind(requestKind)); }
         catch (ProtocolException | SecurityException e) { return; }
@@ -250,10 +277,13 @@ public class Request implements Serializable
        
 
         long startTime = System.nanoTime();
+        long endTime = 0;
 
+        // send request and get response
         try
         { 
             connection.connect();
+            endTime = System.nanoTime();
             responseCode = connection.getResponseCode(); 
             responseMessage = connection.getResponseMessage();
             responseSize = connection.getContentLengthLong();
@@ -262,9 +292,10 @@ public class Request implements Serializable
         }
         catch(IOException e) { Out.printErrors("internet"); }
 
-        long endTime = System.nanoTime();
 
-        responseTime = endTime - startTime;
+        // set response time
+        responseTime = (endTime - startTime) / 1000000;
+
 
 
         if (check)
@@ -276,6 +307,7 @@ public class Request implements Serializable
             Out.printResponseDetails(this);
 
 
+        // for redirects
         if (followRedirect && (responseCode/100 == 3))
         {
             String newUrl = connection.getHeaderField("Location");
@@ -288,6 +320,7 @@ public class Request implements Serializable
 
 
 
+        // check streams 
         if (connection.getErrorStream() != null)
         {
             try{ Out.printResponseBody(connection.getErrorStream()); }
@@ -299,6 +332,7 @@ public class Request implements Serializable
             catch(IOException e){}
         }
 
+        // disconnect the connectons
         connection.disconnect();
     }
 
@@ -322,8 +356,12 @@ public class Request implements Serializable
      */
     public void saveToFile()
     {
-        try { DataBase.saveRequest(groupName, requestName, this); }
-        catch (IOException e) { System.out.println(e.getMessage()); System.out.println('S'); }
+        try 
+        {
+            if (DataBase.saveRequest(groupName, requestName, this)) 
+                Out.printErrors("issaved");
+        }
+        catch (IOException e) { Out.printErrors("save"); }
     }
 
 
@@ -336,18 +374,8 @@ public class Request implements Serializable
      */
     protected void setHeaders()
     {
-        if (requestHeaders == null)
-            return;
-
-
-        connection.setRequestProperty("User-Agent", USER_AGENT);
-
-
         for (String key : requestHeaders.keySet())
             connection.setRequestProperty(key, requestHeaders.get(key));
-
-        if (!requestHeaders.keySet().contains("Accept"))
-            connection.setRequestProperty("Accept", ACCEPT);
     }
 
 
@@ -358,7 +386,12 @@ public class Request implements Serializable
      */
     protected void buildHeaders(String headers)
     {
-        if (requestHeaders == null || headers.equals(""))
+        requestHeaders.put("User-Agent", USER_AGENT);
+        requestHeaders.put("Accept", ACCEPT);
+
+
+
+        if (headers == null || headers.equals(""))
             return;
 
         
@@ -463,9 +496,12 @@ public class Request implements Serializable
      */
     protected String checkURL(String url)
     {
-        if ((url.substring(0, 7)).equals("http://"))
-            return url;
+        try
+        {
+            if ((url.substring(0, 7)).equals("http://"))
+                return url;
 
+        } catch (StringIndexOutOfBoundsException e) {}
 
         return "http://" + url;
     }
