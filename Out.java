@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Scanner;
 
 
 
@@ -13,7 +14,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.9
+ * @version 0.2.0
  */
 public final class Out 
 {
@@ -118,7 +119,7 @@ public final class Out
         RESPONSE_HEADERS.println("\n\n  ------ Response Details ------  \n");
 
 
-        RESPONSE_HEADERS.println(" " + request.getResponseHeader("details"));
+        RESPONSE_HEADERS.println(" " + request.getResponseHeader("details") + "  " + request.getResponseTime() + " ms");
         
         for (String key : request.getResponseHeaders())
         {
@@ -145,17 +146,19 @@ public final class Out
      */
     public static double printResponseBody(InputStream connectionInputStream) throws IOException
     {
-        byte[] character = new byte[1];
+        InputStream in = connectionInputStream;
+        byte[] byts = null;
+        try(FileOutputStream out = new FileOutputStream(DataBase.getResponseBodyGuiPath())) 
+        {
+            byts = in.readAllBytes();
+            out.write(byts);
+        } 
+        catch (IOException ex) { Out.printErrors("cantReadResponseBody"); }
 
 
-        while (connectionInputStream.read(character) != -1)
-        { 
-            RESPONSE_BODY.print((char) (character[0]));
-
-            if (terminalCheck)
-                System.out.print((char) (character[0]));
-        }
-
+        if (terminalCheck)
+            for (byte b : byts)
+                System.out.print((char) b);
 
         File responseBodyFile = new File(DataBase.getResponseBodyGuiPath());
         return responseBodyFile.length() / 1024f; 
@@ -187,6 +190,8 @@ public final class Out
 
 
         File output = new File(outputFilePath);
+        File mkdirForFile = new File(output.getParent());
+        mkdirForFile.mkdirs();
 
         try (BufferedInputStream responseBodyFile = new BufferedInputStream(new FileInputStream(DataBase.getResponseBodyGuiPath()));
              BufferedOutputStream outputFile = new BufferedOutputStream(new FileOutputStream(output)))
@@ -215,7 +220,7 @@ public final class Out
         int groupNumber = 0; 
         for (String group : requests.keySet())
         {
-            System.out.println("|––––– " + groupNumber +": " + group + "\n|       |\n|       |");
+            System.out.println("|––––– " + groupNumber +": " + group + "\n|       |");
 
 
             int requestNumber = 0;
@@ -226,7 +231,7 @@ public final class Out
                 catch (IOException e) { System.out.println(e.getLocalizedMessage()); Out.printErrors("load"); }
 
 
-                System.out.print("|       |––––– " + requestNumber + ": ");
+                System.out.print("|       |\n|       |––––– " + requestNumber + ": ");
 
                 System.out.print("url: " + holdForPrint.getUrl() + " | ");
                 System.out.print("method: " + RequestKinds.getKind(holdForPrint.getRequestKind()) + " | ");
@@ -275,7 +280,13 @@ public final class Out
      *          'outputNotExist', 
      *          'output', 
      *          'load', 
-     *          'guiFiles'
+     *          'guiFiles', 
+     *          'cantRemove', 
+     *          'cantRemoveD', 
+     *          'urlFirst', 
+     *          'badEntery', 
+     *          'cantReadResponseBody', 
+     *          'issaved'
      * 
      *      
      * 
@@ -285,7 +296,7 @@ public final class Out
     public static void printErrors(String whichCase, String errorFactor)
     {
         if (terminalCheck)
-            System.out.print("Jurl:  ");
+            System.out.print("\n\nJurl:  ");
 
 
         switch (whichCase)
@@ -380,6 +391,37 @@ public final class Out
             break;
 
 
+            case "cantRemove":
+                ERRORS_LOG.println(" can not remove the choosen request file");
+            break;
+
+
+            case "cantRemoveD":
+                ERRORS_LOG.println(" can not remove the choosen group");
+            break;
+
+
+            case "urlFirst":
+                ERRORS_LOG.println(" your first input shuold be the url of new request");
+            break;
+
+
+            case "badEntery":
+                ERRORS_LOG.println(" bad entery for option:  " + errorFactor);
+            break;
+
+
+            case "cantReadResponseBody":
+                ERRORS_LOG.println(" can not read response body");
+            break;
+
+
+            case "issaved":
+                ERRORS_LOG.println(" can't save this request. there is a same file with this name and group.");
+            break;
+
+
+
 
             default:
             break;
@@ -414,7 +456,12 @@ public final class Out
      *          'outputNotExist', 
      *          'output', 
      *          'load', 
-     *          'guiFiles'
+     *          'guiFiles', 
+     *          'cantRemove', 
+     *          'cantRemoveD', 
+     *          'urlFirst', 
+     *          'cantReadResponseBody', 
+     *          'issaved'
      *          
      * 
      * 
