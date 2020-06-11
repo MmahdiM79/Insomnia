@@ -5,7 +5,7 @@
  * This enum reprsent HTTP requset kinds
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.2.0
  */
 public enum RequestKinds 
 {
@@ -13,7 +13,7 @@ public enum RequestKinds
     GET,
     POST,
     PUT,
-    DELET;
+    DELETE;
 
 
 
@@ -43,8 +43,8 @@ public enum RequestKinds
             case "PUT":
                 return PUT;
 
-            case "DELET":
-                return DELET;
+            case "DELETE":
+                return DELETE;
 
             default:
                 return null;
@@ -73,8 +73,8 @@ public enum RequestKinds
             case PUT:
                 return "PUT";
 
-            case DELET:
-                return "DELET";
+            case DELETE:
+                return "DELETE";
 
             default:
                 return null;
