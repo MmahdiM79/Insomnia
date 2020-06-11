@@ -11,7 +11,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.2.0
  */
 public class BinaryFileBody extends RequestBody
 {
@@ -58,8 +58,9 @@ public class BinaryFileBody extends RequestBody
      */
     public void build()
     {
+        // check that given path is available or not
         try { bodyFile = new FileInputStream(filePath); }
-        catch (FileNotFoundException e) { error();}
+        catch (FileNotFoundException e) { error(); }
     }
 
 
@@ -70,8 +71,8 @@ public class BinaryFileBody extends RequestBody
     {
         BufferedInputStream fileInputStream = new BufferedInputStream(bodyFile);
 
-        super.Content_Length = fileInputStream.readAllBytes().length;
         connectionOutputStream.write(fileInputStream.readAllBytes());
+        super.Content_Length = fileInputStream.readAllBytes().length;
 
         connectionOutputStream.flush();
         connectionOutputStream.close();
