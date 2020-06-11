@@ -13,7 +13,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.4
+ * @version 0.2.0
  */
 public class FormDataBody extends RequestBody
 {
@@ -106,16 +106,18 @@ public class FormDataBody extends RequestBody
     {
         for (String key : keyValues.keySet())
         {
+            // write boundry
             try
             { 
                connectionOutputStream.write(boundary.getBytes()); 
                super.Content_Length += boundary.getBytes().length;
             }
-           catch (IOException e) {System.out.println(" an IOException:" + e.getMessage()); error();}
+            catch (IOException e) {System.out.println(" an IOException:" + e.getMessage()); error();}
 
 
-           if (key.contains("(FILE)")) 
-           {
+            // for file cases
+            if (key.contains("(FILE)")) 
+            {
                 connectionOutputStream.write(("Content-Disposition: form-data; filename=\"" + 
                                         (new File(keyValues.get(key))).getName() + 
                                             "\"\r\nContent-Type: Auto\r\n\r\n").getBytes());
@@ -137,6 +139,7 @@ public class FormDataBody extends RequestBody
                 catch (IOException e) { error(); }
             } 
 
+            // for text cases
             else 
             {
                 super.Content_Length += ("Content-Disposition: form-data; name=\"" + key + "\"\r\n\r\n").getBytes().length;
