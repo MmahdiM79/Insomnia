@@ -10,7 +10,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.7
+ * @version 0.2.0
  */
 public abstract class RequestBody  implements Serializable
 {
@@ -76,7 +76,6 @@ public abstract class RequestBody  implements Serializable
      */
     protected void error()
     {
-        System.out.println(" An error occurs while trying to set requset body - ( check Jurl --help )");
-        System.exit(0);
+        Out.printErrors("bodyBuild");
     }
 }
