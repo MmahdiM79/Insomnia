@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 
 
@@ -11,7 +12,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.3
+ * @version 0.2.0
  */
 public class JsonBody extends RequestBody
 {
@@ -70,7 +71,6 @@ public class JsonBody extends RequestBody
             error();
 
 
-        jsonBodyString = jsonBodyString.replaceAll("\"", "");
         jsonBodyString = jsonBodyString.replaceAll(" ", "");
         jsonBodyString = jsonBodyString.substring(1, jsonBodyString.length()-1);
 
@@ -87,6 +87,12 @@ public class JsonBody extends RequestBody
 
                 if (value.length() == 0 || key.length() == 0)
                     error();
+
+                if (key.charAt(0) != '\"' || key.charAt(key.length()-1) != '\"')
+                    error();
+
+                if (value.charAt(0) != '\"' || key.charAt(value.length()-1) != '\"')
+                    error();
             }
             catch (IndexOutOfBoundsException e) { error(); }
         }
@@ -98,7 +104,7 @@ public class JsonBody extends RequestBody
      */
     public void set(OutputStream connectionOutputStream) throws IOException
     {
-        byte[] input = jsonBodyString.getBytes("utf-8");
+        byte[] input = jsonBodyString.getBytes(StandardCharsets.UTF_8);
 
         super.Content_Length = input.length;
 
