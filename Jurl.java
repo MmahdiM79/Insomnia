@@ -13,7 +13,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.9
+ * @version 0.2.0
  */
 public class Jurl 
 {
@@ -33,7 +33,7 @@ public class Jurl
                                          "-l", "--list",     // show the list of the request groups
                                          "rm", "--remove",   // remove a request or group
                                          "so", "--save-over",// override saving
-                                               "--send",     // send again the given requests
+                                               "send",     // send again the given requests
                                                "--help",     // open help text
                                          "-f",               // follow redirect
                                          "-i",               // show the response or not
@@ -82,9 +82,10 @@ public class Jurl
 
     public static void main(String[] inputs) throws IOException
     {
-        //String[] inputss = {"google.com", "-i", "-s"};
-
+        // set user inputs in a ArrayList
         getArgs(inputs);
+
+        // check number of the user inputs
         if (args.size() == 0)
         {
             System.out.println("Jurl:   no option given");
@@ -93,6 +94,7 @@ public class Jurl
         }
 
 
+        // check that user is using GUI or not 
         if (args.contains("--GUI--"))
             terminal = false;
         else    
@@ -101,24 +103,37 @@ public class Jurl
             System.out.flush();
         }
 
+
+        // initialize static classes
         init();
 
 
 
 
-        if (args.contains("rm") || args.contains("--remove"))   
-        {
+        // check that user wants to send a request or someting else
+        if (args.contains("rm") || args.contains("--remove") || args.contains("--send"))
             doSomeThing = true;
-            removeOption();
-        }
 
-        
+
+
+
+
+
+        // do help option
         if (args.contains("--help"))
         {
             showHelp();
             return;
         }
 
+        // do remove option
+        if (args.contains("rm") || args.contains("--remove"))   
+        {
+            doSomeThing = true;
+            removeOption();
+        }
+
+        // do list option
         if (args.contains("-l") || args.contains("--list"))
         {
             Out.list(DataBase.getRequests());
@@ -126,21 +141,28 @@ public class Jurl
         }
 
     
-        if (isArgDefined(args.get(0)) && !doSomeThing)
+        // check that user has given a url or not
+        if (!doSomeThing && isArgDefined(args.get(0)))
             Out.printErrors("urlFirst");
-
-        else if (isArgDefined(args.get(0)) && doSomeThing)
+        else if (!isArgDefined(args.get(0)) && doSomeThing)
             return;
 
+        
+        // set url
         url = args.get(0);
 
 
+        // see and set user inputs
         checkInputsAndSetFields();
 
+
+        // do save option
         if (args.contains("-s") || args.contains("--save"))
             saveOption();
 
 
+
+        // creat request with user given details
         if (!method.equals("GET"))
             request = new RequestWithBody(name, 
                                           group, 
@@ -158,18 +180,22 @@ public class Jurl
 
         
 
+        // save request if user want it 
         if (args.contains("-s") || args.contains("--save"))
             request.saveToFile();
 
 
+        // send the request
         request.run();
 
 
+        // do output option
         if (args.contains("-o") || args.contains("--output"))
             Out.saveOutput(outputFileName, request.getResponseBodyFormat());
 
 
-        if (args.contains("--send"))
+        // do send option
+        if (args.contains("send"))
             sendOption();
     }
 
@@ -232,7 +258,17 @@ public class Jurl
 
         query = checkArg("-q", "--query", true);
 
-        outputFileName = checkArg("-o", "--output", true);
+
+        if (args.contains("-o") || args.contains("--output"))
+        {
+            checkToTime("-o", "--output");
+
+            String usedArg = args.contains("-o") ? "-o" : "--output";
+
+
+            if (args.indexOf(usedArg)+1 < args.size() && !isArgDefined(args.get(args.indexOf(usedArg)+1)))
+                outputFileName = args.get(args.indexOf(usedArg)+1);
+        }
     }
 
 
@@ -257,8 +293,11 @@ public class Jurl
         String selectedArg = args.contains("-s") ? "-s" : "--save";
         checkHasEntery(selectedArg);
 
+        if (args.contains("so") || args.contains("--save-over"))
+            DataBase.setOverride(true);
 
-        if (!isArgDefined(args.get(args.indexOf(selectedArg)+2)))
+
+        if (args.indexOf(selectedArg)+2 < args.size() && !isArgDefined(args.get(args.indexOf(selectedArg)+2)))
         {
             group = args.get(args.indexOf(selectedArg)+1);
             name = args.get(args.indexOf(selectedArg)+2);
@@ -267,7 +306,38 @@ public class Jurl
             name = args.get(args.indexOf(selectedArg)+1);
     }
 
+
+    private static void sendOption()
+    {
+        checkHasEntery("send");
+
+
+        ArrayList<String> sendEntries = new ArrayList<>();
+        for (int i = args.indexOf("send")+1; i < args.size(); i++)
+        {
+            if (!isArgDefined(args.get(i)))
+            {
+                if (args.get(i).length() != 2)
+                    Out.printErrors("badEntery", "send");
+                else
+                    sendEntries.add(args.get(i));
+            }
+            else 
+                break;
+        }
+
+
+        Request reqToResend = null;
+        for (String reqCode : sendEntries)
+        {
+            try { reqToResend = DataBase.openRequest(reqCode.charAt(0)-'0', reqCode.charAt(1)-'0'); }
+            catch (IOException e) { Out.printErrors("load"); }
+
+            reqToResend.run();
+        }        
+    }
     
+
     // this method check that user given arg is defined or not
     private static boolean isArgDefined(String arg)
     {
@@ -421,9 +491,9 @@ public class Jurl
         "\t\t 'java Jurl rm 01' means that remove request number 1 from group number 0. \n" + 
         "\t\t this option only gives one code (remove a group or remove a request) at the same time. \n\n\n" +
 
-        "\t --send    <request code> \n\n" +
+        "\t send    <request code> \n\n" +
         "\t\t use this request to send a saved request. \n" +
-        "\t\t 'java Jurl --send 00' means that re-send request number 0 form group number 0" + 
+        "\t\t 'java Jurl send 00' means that re-send request number 0 form group number 0" + 
 
         "\n\n \t\t\t\t ------------------------------------------------- \n\n"
         );
