@@ -13,7 +13,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class Jurl 
 {
@@ -30,6 +30,7 @@ public class Jurl
                                          "-s", "--save",     // save request
                                          "-q", "--query",    // add a query to request
                                          "-u", "--upload",   // send a file as request body
+                                         "-j", "--json",     // send a json as request body 
                                          "-l", "--list",     // show the list of the request groups
                                          "rm", "--remove",   // remove a request or group
                                          "so", "--save-over",// override saving
@@ -86,7 +87,7 @@ public class Jurl
         getArgs(inputs);
 
         // check number of the user inputs
-        if (args.size() == 0)
+        if (args.isEmpty())
         {
             System.out.println("Jurl:   no option given");
             System.out.print("Jurl:   try 'java Jurl --help' for more information\n");
@@ -241,7 +242,11 @@ public class Jurl
         
         
         checkAndSetMethod();
-        if (method.equals("get") && (args.contains("-d") || args.contains("--data")))
+        if (method.equals("get") && (args.contains("-d") || args.contains("--data")
+                                     ||
+                                     args.contains("-j") || args.contains("--json")
+                                     ||
+                                     args.contains("-u") || args.contains("--upload")))
             Out.printErrors("GET");
 
         
@@ -253,8 +258,6 @@ public class Jurl
 
         
         headers = checkArg("-h", "--headers", true);
-
-        bodyDatas = checkArg("-d", "--data", true);
 
         query = checkArg("-q", "--query", true);
 
@@ -269,6 +272,66 @@ public class Jurl
             if (args.indexOf(usedArg)+1 < args.size() && !isArgDefined(args.get(args.indexOf(usedArg)+1)))
                 outputFileName = args.get(args.indexOf(usedArg)+1);
         }
+
+        
+        checkBody();
+    }
+
+
+
+
+    // check the kind of the request body
+    private static void checkBody()
+    {
+        if (!(args.contains("-d") || args.contains("--data")
+             ||
+             args.contains("-u") || args.contains("--upload")
+             ||
+             args.contains("-j") || args.contains("--json")))
+        
+                return;
+
+        
+
+        boolean j = false, fd = false, bf = false;
+        String usedArg;
+
+        if (args.contains("-d") || args.contains("--data"))
+        {
+            usedArg = args.contains("-d") ? "-d" : "--data";
+            checkHasEntery(usedArg);
+
+            fd = true;
+            requestBodyKind = "form-data";
+            bodyDatas = args.get(args.indexOf(usedArg)+1);
+        }
+
+        if (args.contains("-u") || args.contains("--upload"))
+        {
+            usedArg = args.contains("-u") ? "-u" : "--upload";
+            checkHasEntery(usedArg);
+
+            bf = true;
+            requestBodyKind = "binary-file";
+            bodyDatas = args.get(args.indexOf(usedArg)+1);
+        }
+
+        if (args.contains("-j") || args.contains("--json"))
+        {
+            usedArg = args.contains("-j") ? "-j" : "--json";
+            checkHasEntery(usedArg);
+
+            j = true;
+            requestBodyKind = "json";
+            bodyDatas = args.get(args.indexOf(usedArg)+1);
+        }
+        
+
+        int cntr = 0;
+        if (j) cntr++; if (fd) cntr++; if (bf) cntr++;
+
+        if (cntr > 1)
+            Out.printErrors("multiBody");
     }
 
 
@@ -474,7 +537,7 @@ public class Jurl
         "\t\t add '(FILE)' at the end of your key and set your file path as value of this key \n" +
         "\t\t some example for bad entry: \"key=\", \"=value\", \"=\", \"key\" \n\n\n" +
 
-        "\t -j, --json    {key:value,key1:value1, ...} \n\n" + 
+        "\t -j, --json    {\\\"key\\\":\\\"value\\\",\\\"key1\\\":\\\"value1\\\", ...} \n\n" + 
         "\t\t use this option to send a JSON with your request. \n" +
         "\t\t if you use this option your body kind will set as JSON. \n\n\n" +
 
