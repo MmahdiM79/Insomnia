@@ -1,9 +1,9 @@
 import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.io.Serializable;
 
 
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.6
+ * @version 0.1.8
  */
 public class LastRequestsGUI extends JPanel
 {
@@ -33,6 +33,9 @@ public class LastRequestsGUI extends JPanel
 
     // hold the Groups panels
     private HashMap<String, JPanel> requestGroupPanels = new HashMap<>();
+
+    // hold request of the groups
+    private HashMap<String, ArrayList<String>> groupsRequests = new HashMap<>();
 
     // add group tab panel
     private JPanel addGroupTabPanel;
@@ -194,6 +197,18 @@ public class LastRequestsGUI extends JPanel
 
             /*  Methods  */
 
+    public boolean saveRequest(String reqKind, String reqName, String gpName, String reqDetails)
+    {
+        if (groupsRequests.get(gpName).contains(reqName))
+        {
+            JOptionPane.showMessageDialog(THIS, "This name has already added !", "error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        requestGroupPanels.get(gpName).add(new ReqeustButton(reqKind, reqName, gpName, reqDetails));
+        return true;
+    }
+
 
     // This return true if the client has been choose a name for new Group
     private boolean isNewGroupNameEmpty()
@@ -235,11 +250,133 @@ public class LastRequestsGUI extends JPanel
 
 
 
+
+
     
 
-     // This class do the even handling of LastRequestsGUI class
-    private class EventHandler implements ActionListener, FocusListener
+
+
+
+
+
+
+
+    // this class represent a button object for reqeusts
+    private class ReqeustButton extends JButton
     {
+                /*  Fields  */
+
+        // request method
+        private String requestKind = null;
+
+        // request name
+        private String requestName = null;
+
+        // request group name
+        private String groupName = null;
+
+        // request details (for Jurl main)
+        private ArrayList<String> requestDetailsString = new ArrayList<>(); 
+
+
+
+
+
+
+             /* Constructor */
+
+        public ReqeustButton(String reqKind, String reqName, String gpName, String reqDetails)
+        {
+            super();
+
+            this.requestKind = reqKind;
+            this.requestName = reqName;
+            this.groupName = gpName;
+            setDetails(reqDetails);
+
+
+            super.setMaximumSize(new Dimension(170, 50)); // set maximum size of the button
+            super.setFont (super.getFont().deriveFont(12.0f)); // set text size
+            super.setForeground(Color.WHITE); // set text color
+            super.setBackground(backgroundColor); // set background color
+            super.setOpaque(true);
+
+            super.setText(buildButtonText());
+
+            super.addActionListener(handler);
+
+            System.out.println(this.getParent());
+        }
+
+
+
+
+
+
+                /*  Methods  */
+
+        /**
+         * This method change the request button method
+         * 
+         * @param newMethod : new method of the request to send
+         */
+        public void changeMethod(String newMethod)
+        {
+            this.requestKind = newMethod;
+            this.setText(buildButtonText());
+        }
+
+        
+
+        // this method read request details from given string
+        private void setDetails(String reqDetails)
+        {
+            String[] details = reqDetails.split(" ");
+
+            for (String detail : details)
+                this.requestDetailsString.add(detail);
+        }
+
+        // return button text
+        private String buildButtonText()
+        {
+            String colorCode = null;
+            switch (this.requestKind)
+            {
+                case "GET": colorCode = "rgb(121, 108, 197)"; break;
+                case "POST": colorCode = "rgb(121, 168, 70)"; break;
+                case "PUT": colorCode = "rgb(197, 122, 46)"; break;
+                case "DELETE" : colorCode = "rgb(193, 78, 73)"; break;
+
+                default: break;
+            }
+
+            return "<html>" + "<b style=\"color:" + colorCode + ";\">" +
+                    ("DELETE".equals(requestKind) ? "DEL": requestKind) +
+                    "&emsp;&emsp;&emsp;&emsp;</b>" + requestName + "</html>";
+        }
+    }
+
+
+
+
+
+
+
+
+
+     // This class do the even handling of LastRequestsGUI class
+    private class EventHandler implements ActionListener, FocusListener, Serializable
+    {
+                /*  Field  */
+
+        // serial version UID
+        private static final long serialVersionUID = 2868377327256959L;
+
+
+
+
+
         /**
          * This method handl the event of the add button and remove button
          * 
@@ -248,8 +385,6 @@ public class LastRequestsGUI extends JPanel
         public void actionPerformed(ActionEvent e) 
         {
             /* add button case */
-            if (e.getSource().equals(getNewGroupNameField))
-                System.out.println(" checkd");
             if (e.getSource().equals(getNewGroupNameField) || e.getSource().equals(addGroupButton))
             {
                 // check that client has choose a name for new group or not
@@ -263,7 +398,7 @@ public class LastRequestsGUI extends JPanel
                 // check the given name
                 if (isAlreadyAdded(newGroupName))
                 {
-                    JOptionPane.showMessageDialog(THIS, "This name has already added !", "error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(THIS, "This group has already added !", "error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -289,7 +424,12 @@ public class LastRequestsGUI extends JPanel
                 groupsComboBox.removeItem(groupNameToRemove); // remove from combo box
             }
 
-            return;
+
+            
+            if (e.getSource() instanceof ReqeustButton)
+            {
+                System.out.println(((ReqeustButton) e.getSource()).requestName);
+            }
         }
 
 
@@ -321,6 +461,6 @@ public class LastRequestsGUI extends JPanel
                     getNewGroupNameField.setText("new group name ... ");
                 }
             }
-		}
+        }
     }
 }
