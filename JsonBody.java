@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class JsonBody extends RequestBody
 {
@@ -91,11 +91,13 @@ public class JsonBody extends RequestBody
                 if (key.charAt(0) != '\"' || key.charAt(key.length()-1) != '\"')
                     error();
 
-                if (value.charAt(0) != '\"' || key.charAt(value.length()-1) != '\"')
+                if (value.charAt(0) != '\"' || value.charAt(value.length()-1) != '\"')
                     error();
             }
             catch (IndexOutOfBoundsException e) { error(); }
         }
+
+        jsonBodyString = "{" + jsonBodyString + "}";
     }
 
 
@@ -104,11 +106,11 @@ public class JsonBody extends RequestBody
      */
     public void set(OutputStream connectionOutputStream) throws IOException
     {
-        byte[] input = jsonBodyString.getBytes(StandardCharsets.UTF_8);
+        byte[] input = jsonBodyString.getBytes();
 
         super.Content_Length = input.length;
 
-        connectionOutputStream.write(input, 0, input.length);           
+        connectionOutputStream.write(input);           
     }
 
 
