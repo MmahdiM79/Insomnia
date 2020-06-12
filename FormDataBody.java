@@ -13,7 +13,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class FormDataBody extends RequestBody
 {
@@ -58,8 +58,8 @@ public class FormDataBody extends RequestBody
         this.datasString = datas;
         this.keyValues = new HashMap<>();
 
-        boundaryKey = "Jurl-MmMmM-79--" + ((new Date()).getTime() + System.nanoTime());
-        this.boundary = "--" + boundaryKey + "\r\n";
+        boundaryKey = "Jurl-MmMmM-79--" + (((new Date()).getTime() + System.nanoTime())/3006009);
+        this.boundary = "--".concat(boundaryKey).concat("\r\n");
     }
 
 
@@ -107,13 +107,9 @@ public class FormDataBody extends RequestBody
         for (String key : keyValues.keySet())
         {
             // write boundry
-            try
-            { 
-               connectionOutputStream.write(boundary.getBytes()); 
-               super.Content_Length += boundary.getBytes().length;
-            }
-            catch (IOException e) {System.out.println(" an IOException:" + e.getMessage()); error();}
-
+            connectionOutputStream.write(boundary.getBytes()); 
+            super.Content_Length += boundary.getBytes().length;
+           
 
             // for file cases
             if (key.contains("(FILE)")) 
@@ -151,8 +147,8 @@ public class FormDataBody extends RequestBody
         }
 
     
-        super.Content_Length += ("--" + boundary + "--\r\n").getBytes().length;
-        connectionOutputStream.write(("--" + boundary + "--\r\n").getBytes());
+        super.Content_Length += boundary.getBytes().length;
+        connectionOutputStream.write(("--" + boundaryKey + "--\r\n").getBytes());
 
         connectionOutputStream.flush();
         connectionOutputStream.close();
@@ -165,6 +161,6 @@ public class FormDataBody extends RequestBody
      */
     public String getContentType()
     {
-        return "multipart/form-data; boundary=" + boundaryKey;
+        return "multipart/form-data; charset=utf-8; boundary=" + boundaryKey;
     }
 }
