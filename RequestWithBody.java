@@ -14,7 +14,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.2.0
  */
 public class RequestWithBody extends Request
 {
@@ -69,10 +69,12 @@ public class RequestWithBody extends Request
                            boolean terminalShow)  throws IOException
     {
         super(name, group, url, (headers == null ? "": headers), query, followRedirect, terminalShow);
+
         super.setRequestKind(method);
 
         this.bodyKind = requestBodyKind;
         this.bodyDatas = bodyDatas;
+        setBodyObject();
     }
 
 
@@ -91,7 +93,10 @@ public class RequestWithBody extends Request
      */
     public String getContentType()
     {
-        return this.requestBody.getContentType();
+        if (requestBody != null)
+            return this.requestBody.getContentType();
+
+        return "no body content";
     }
     /**
      * @return the content length of this request in byte
@@ -116,53 +121,67 @@ public class RequestWithBody extends Request
 
         if (check)
         {
-            try{ url = new URL(urlString);}
-            catch(MalformedURLException e) {error('I');}
-            
-
-            check = false;
+            try{ url = new URL(urlString); }
+            catch(MalformedURLException e) { Out.printErrors("internet"); }
         }
         
-
-
         try{ connection = (HttpURLConnection) url.openConnection(); }
-        catch (IOException e) { error('I'); }
+        catch (IOException e) { Out.printErrors("internet"); }
         
+
+
         try{ connection.setRequestMethod(RequestKinds.getKind(requestKind)); }
         catch (ProtocolException | SecurityException e) { return; }
         
 
         connection.setDoOutput(true);
 
-        
-        setBodyObject(); 
         setHeaders();
     
-    
-        requestBody.build();
-        try{ requestBody.set(connection.getOutputStream()); }
-        catch(IOException e) { System.out.println(e.getMessage()); error('B'); }
-        
-
-        for (String key : requestHeaders.keySet())
-            System.out.println(key + ":  " + requestHeaders.get(key));
 
 
-        long startTime = System.nanoTime();
+
+
+        long startTime = System.nanoTime(), endTime = 0;
+
+        if (requestBody != null)
+        {
+            requestBody.build();
+
+            try
+            { 
+                requestBody.set(connection.getOutputStream()); 
+                endTime = System.nanoTime();
+            }
+            catch(IOException e) { Out.printErrors("reqbody"); }
+        }
+
 
         try
         { 
             connection.connect();
             responseCode = connection.getResponseCode(); 
+            if (endTime == 0)
+                endTime = System.nanoTime();
             responseMessage = connection.getResponseMessage();
             responseSize = connection.getContentLengthLong();
             readResponseHeaders();
+            setResponseBodyFormat();
         }
-        catch(IOException e) { error('I'); }
+        catch(IOException e) { Out.printErrors("internet"); }
 
-        long endTime = System.nanoTime();
+        responseTime = (endTime - startTime) / 1000000;
 
-        responseTime = endTime - startTime;
+
+
+        if (check)
+        {
+            Out.printRequestDetails(this);
+            check = false;
+        }
+        if (showResponseHeaders)
+            Out.printResponseDetails(this);
+
 
 
 
@@ -171,10 +190,24 @@ public class RequestWithBody extends Request
             String newUrl = connection.getHeaderField("Location");
 
             try { this.url = new URL(newUrl); }
-            catch (MalformedURLException e) { error('I'); }
+            catch (MalformedURLException e) { Out.printErrors("internet"); }
 
             this.run(); 
         }
+
+
+        if (connection.getErrorStream() != null)
+        {
+            try{ Out.printResponseBody(connection.getErrorStream()); }
+            catch(IOException e){}
+        }
+        else
+        {
+            try{ Out.printResponseBody(connection.getInputStream()); }
+            catch(IOException e){}
+        }
+
+        connection.disconnect();
     }
 
 
@@ -188,7 +221,11 @@ public class RequestWithBody extends Request
     {
         super.setHeaders();
 
-        super.addHeader("Content-Type", this.getContentType());
+        if (bodyKind != null)
+        {
+            connection.setRequestProperty("Content-Type", this.getContentType());
+            super.addHeader("Content-Type", this.getContentType());
+        }
     }
 
 
@@ -198,6 +235,10 @@ public class RequestWithBody extends Request
     // this method set the request body object
     private void setBodyObject()
     {
+        if (bodyKind == null)
+            return;
+
+
         switch(bodyKind.toLowerCase())
         {
             case "form-data":
