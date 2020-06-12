@@ -14,7 +14,7 @@ import java.util.Scanner;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.2
  */
 public final class Out 
 {
@@ -286,7 +286,9 @@ public final class Out
      *          'urlFirst', 
      *          'badEntery', 
      *          'cantReadResponseBody', 
-     *          'issaved'
+     *          'issaved', 
+     *          'bodyBuild'
+     *          'multiBody'
      * 
      *      
      * 
@@ -321,7 +323,7 @@ public final class Out
             break;
 
 
-            case "reqBody":
+            case "reqbody":
                 ERRORS_LOG.println(" failed to set the body of this request");
             break;
 
@@ -421,6 +423,16 @@ public final class Out
             break;
 
 
+            case "bodyBuild":
+                ERRORS_LOG.println(" an error occurs while trying to set requset body");
+            break;
+
+
+            case "multiBody":
+                ERRORS_LOG.println(" you can only use one of the -j, -u and -d options");
+            break;
+
+
 
 
             default:
@@ -434,7 +446,7 @@ public final class Out
             System.exit(0);
         }
         else
-            ERRORS_LOG.print("\n");
+            ERRORS_LOG.print(whichCase + "\n" + errorFactor + "\n");
     }
 
 
@@ -461,7 +473,9 @@ public final class Out
      *          'cantRemoveD', 
      *          'urlFirst', 
      *          'cantReadResponseBody', 
-     *          'issaved'
+     *          'issaved', 
+     *          'bodyBuild', 
+     *          'multiBody'
      *          
      * 
      * 
