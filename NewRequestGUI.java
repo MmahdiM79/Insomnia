@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.1
  */
 public class NewRequestGUI extends JPanel
 {
@@ -274,6 +274,77 @@ public class NewRequestGUI extends JPanel
     }
 
 
+    /**
+     * This method set fields of this panel with given details
+     * 
+     * @param detatils : request details
+     */
+    public void setPanel(String detatils)
+    {
+        String[] args = detatils.split("");
+        ArrayList<String> inputs = new ArrayList<>();
+        for (String arg : args)
+            inputs.add(arg);
+
+
+        getUrlTextField.setText(args[0]);
+
+        requestKindComboBox.setSelectedItem(inputs.get(inputs.indexOf("-m")+1));
+
+
+        if (inputs.contains("-h"))
+        {
+            String headers = inputs.get(inputs.indexOf("-h")+1);
+
+            NameValueData hold = null;
+            for (String pair : headers.split(","))
+            {
+                hold = new NameValueData(pair.substring(0, pair.indexOf(":")), 
+                                         pair.substring(pair.indexOf(":")+1),
+                                         headerTabPanel,
+                                         headerDatas);
+
+                headerTabPanel.add(hold);
+                headerDatas.add(hold);
+            }
+        }
+
+
+        if (inputs.contains("-q"))
+        {
+            String headers = inputs.get(inputs.indexOf("-q")+1);
+
+            NameValueData hold = null;
+            for (String pair : headers.split("&"))
+            {
+                hold = new NameValueData(pair.substring(0, pair.indexOf("=")), 
+                                         pair.substring(pair.indexOf("=")+1),
+                                         queryTabPanel,
+                                         queryDatas);
+
+                queryTabPanel.add(hold);
+                queryDatas.add(hold);
+            }
+        }
+
+
+        if (inputs.contains("-d"))
+        {
+            String headers = inputs.get(inputs.indexOf("-d")+1);
+
+            NameValueData hold = null;
+            for (String pair : headers.split("&"))
+            {
+                hold = new NameValueData(pair.substring(0, pair.indexOf("=")), 
+                                         pair.substring(pair.indexOf("=")+1),
+                                         formDataKindPanel,
+                                         formDatas);
+
+                formDataKindPanel.add(hold);
+                formDatas.add(hold);
+            }
+        }
+    }
 
 
 
