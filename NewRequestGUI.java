@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.8
+ * @version 0.2.0
  */
 public class NewRequestGUI extends JPanel
 {
@@ -80,19 +80,6 @@ public class NewRequestGUI extends JPanel
    
 
 
-    // Auth tab panel
-    private JPanel authTabPanel = new JPanel();
-
-    // get token text field
-    private JTextField getTokenTextField = new JTextField(" TOKEN . . .");
-
-    // get preifix text field
-    private JTextField getPrefixTextField = new JTextField(" PREFIX . . ."); 
-
-    // enable check box
-    private JCheckBox enabledCheckButton = new JCheckBox(" ENABLE "); // creat new radio button
-
-
 
     // Query tab panel
     private JPanel queryTabPanel = new JPanel();
@@ -110,6 +97,9 @@ public class NewRequestGUI extends JPanel
 
 
 
+
+    // a pointer to this object
+    private NewRequestGUI THIS;
 
     // Event handler of buttons
     private EventHandler mainHandler = new EventHandler();
@@ -146,6 +136,7 @@ public class NewRequestGUI extends JPanel
         this.setOpaque(true); // apply color changes
 
 
+        THIS = this;
 
 
         // set background color
@@ -164,9 +155,6 @@ public class NewRequestGUI extends JPanel
 
         // set body tab
         bodyTabGuiInit();
-        
-        // set auth tab
-        authTabGuiInit();
 
         // set query tab
         queryTabGuiInit();
@@ -188,6 +176,113 @@ public class NewRequestGUI extends JPanel
             /*  Methods  */
 
 
+    /**
+     * @return the user choosen url
+     */
+    public String getUrl()
+    {
+        if (getUrlTextField.getText().equals(" https:// ?! "))
+        {
+            JOptionPane.showMessageDialog(THIS, "Please choose a url to send reqeust.", "error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        return getUrlTextField.getText();
+    }
+
+
+    /**
+     * @return user choosen method
+     */
+    public String getMethod()
+    {
+        return " -m " + requestKindComboBox.getSelectedObjects();
+    }
+
+
+    /**
+     * @return user choosen headers for new request
+     */
+    public String getHeaders()
+    {
+        String output = "";
+        for (NameValueData data : headerDatas)
+        {
+            if (!data.isSelected())
+                continue;
+
+            if (data.getDataName().length() == 0 || data.getDataValue().length() == 0)
+            {
+                JOptionPane.showMessageDialog(THIS, "Some of your choosen headers are incorrect !", "error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+
+            output = output + data.getDataName() + ":" + data.getDataValue() + ",";
+        }
+
+        if (output.length() != 0)
+            output = output.substring(0, output.length()-1);
+        return output;
+    }
+
+
+    /**
+     * @return user choosen query
+     */
+    public String getQuery()
+    {
+        String output = "";
+        for (NameValueData data : queryDatas)
+        {
+            if (!data.isSelected())
+                continue;
+
+            if (data.getDataValue().length() == 0)
+            {
+                JOptionPane.showMessageDialog(THIS, "Your Query is incorrect !", "error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+
+            output = output + data.getDataName() + "=" + data.getDataValue() + "&";
+        }
+
+        if (output.length() != 0)
+            output = output.substring(0, output.length()-1);
+        return output;
+    }
+
+
+    /**
+     * @return a {@code String} to set the request body
+     */
+    public String getBody()
+    {
+        switch ((String) bodyKindsComboBox.getSelectedItem())
+        {
+            case "Form data":
+                return getFormData();
+
+            case "JSON":
+                return getJson();
+
+            case "Binary file":
+                return getBinaryFile();
+
+            default:
+                return null;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
     // This method set the north part of the new request details
     private void urlPartGuiInit()
     {
@@ -204,7 +299,6 @@ public class NewRequestGUI extends JPanel
         requestKindComboBox.addItem("<html><p style=\"color:rgb(121, 108, 197);\"> GET </p></html>");
         requestKindComboBox.addItem("<html><p style=\"color:rgb(121, 168, 70);\"> POST </p></html>");
         requestKindComboBox.addItem("<html><p style=\"color:rgb(197, 122, 46);\"> PUT </p></html>");
-        requestKindComboBox.addItem("<html><p style=\"color:rgb(171, 150, 49);\"> PATCH </p></html>");
         requestKindComboBox.addItem("<html><p style=\"color:rgb(193, 78, 73);\"> DELET </p></html>");
         requestKindComboBox.setFont(requestKindComboBox.getFont().deriveFont(15.0f)); // set the text size
         requestKindComboBox.setBackground(Color.WHITE); // set background color
@@ -252,12 +346,13 @@ public class NewRequestGUI extends JPanel
         // set body tab panel
         bodyTabMainPanel.setBackground(backgroundColor); // set background color
         bodyTabMainPanel.setOpaque(true); // apply color changes
-        bodyTabMainPanel.setLayout(new BoxLayout(bodyTabMainPanel, BoxLayout.Y_AXIS)); // set layout manager
+        bodyTabMainPanel.setLayout(new BorderLayout()); // set layout manager
         requestDetailsTabs.add("Body", bodyTabMainPanel); // add body panel
 
 
         
         // set body kinds combo box
+        bodyKindsComboBox.setMaximumSize(new Dimension(925, 30));
         bodyKindsComboBox.setBackground(backgroundColor); // set background color
         bodyKindsComboBox.setOpaque(true); // apply color changes
         bodyKindsComboBox.addItem("Form data"); 
@@ -265,7 +360,7 @@ public class NewRequestGUI extends JPanel
         bodyKindsComboBox.addItem("Binary file");
         bodyKindsComboBox.addActionListener(mainHandler);
         bodyKindsComboBox.addFocusListener(mainHandler);
-        bodyTabMainPanel.add(bodyKindsComboBox); // add to tab panel
+        bodyTabMainPanel.add(bodyKindsComboBox, BorderLayout.NORTH); // add to tab panel
        
         
 
@@ -273,7 +368,12 @@ public class NewRequestGUI extends JPanel
         bodyTabSubPanel.setLayout(new CardLayout()); // set layout manager
         bodyTabSubPanel.setBackground(backgroundColor); // set the background color
         bodyTabSubPanel.setOpaque(true); // apply color changes
-        bodyTabMainPanel.add(bodyTabSubPanel); // add edit panel 
+
+        // set body kinds panel scroll pane
+        JScrollPane bodyTabSubPanelScrollPane = new JScrollPane(bodyTabSubPanel);
+        bodyTabSubPanelScrollPane.setBackground(backgroundColor);
+        bodyTabSubPanelScrollPane.setOpaque(true);
+        bodyTabMainPanel.add(bodyTabSubPanelScrollPane, BorderLayout.CENTER); // add edit panel 
         
 
 
@@ -313,7 +413,7 @@ public class NewRequestGUI extends JPanel
 
         
         // set choosen file label
-        choosenBinaryFileName.setPreferredSize(new Dimension(500, 35)); // set size
+        choosenBinaryFileName.setPreferredSize(new Dimension(300, 35)); // set size
         choosenBinaryFileName.setFont(choosenBinaryFileName.getFont().deriveFont(14.0f)); // set text size
         choosenBinaryFileName.setBackground(Color.WHITE); // set back ground color
         choosenBinaryFileName.setOpaque(true); // apply color changes
@@ -337,47 +437,6 @@ public class NewRequestGUI extends JPanel
         chooseFileButton.addActionListener(mainHandler);
         chooseFileButton.addFocusListener(mainHandler);
         binaryFileKindPanel.add(chooseFileButton); // add to the binary panel
-    }
-
-
-    // This method set the auth tab of the new requset
-    private void authTabGuiInit()
-    {
-        // set Auth panel
-        authTabPanel.setLayout(new BoxLayout(authTabPanel, BoxLayout.Y_AXIS)); // set layout manager
-        authTabPanel.setBackground(backgroundColor); // set background color
-        authTabPanel.setOpaque(true); // apply changes
-        requestDetailsTabs.addTab("Auth", authTabPanel); // add auth panel
-
-
-        // set token text field
-        getTokenTextField.setFont(getTokenTextField.getFont().deriveFont(16.0f)); // set text size
-        getTokenTextField.setForeground(backTextColor); // set text color
-        getTokenTextField.setOpaque(true); // apply color changes
-        getTokenTextField.setMaximumSize(new Dimension(920, 35)); // set size
-        getTokenTextField.addActionListener(mainHandler);
-        getTokenTextField.addFocusListener(mainHandler);
-        authTabPanel.add(getTokenTextField); // add to the auth panel
-
-
-        // set prefix text field
-        getPrefixTextField.setFont(getPrefixTextField.getFont().deriveFont(16.0f)); // set text size
-        getPrefixTextField.setForeground(backTextColor); // set text color
-        getPrefixTextField.setOpaque(true); // apply color changes
-        getPrefixTextField.setMaximumSize(new Dimension(920, 35)); // set size
-        getPrefixTextField.addActionListener(mainHandler);
-        getPrefixTextField.addFocusListener(mainHandler);
-        authTabPanel.add(getPrefixTextField); // add to the auth panel
-       
-
-        // set enabled check box
-        enabledCheckButton.putClientProperty("JComponent.sizeVariant", "large"); // set size
-        enabledCheckButton.setBackground(backgroundColor); // set background color
-        enabledCheckButton.setForeground(Color.GREEN); // set text color
-        enabledCheckButton.setOpaque(true); // apply color changes
-        enabledCheckButton.addActionListener(mainHandler);
-        enabledCheckButton.addFocusListener(mainHandler);
-        authTabPanel.add(enabledCheckButton); // add to the auth panel
     }
 
 
@@ -410,6 +469,55 @@ public class NewRequestGUI extends JPanel
         headerDatas.add(new NameValueData("new header ...", "new value ...", headerTabPanel, headerDatas));
         headerTabPanel.add(headerDatas.get(0));
     }
+
+
+    // This method generate a String for request body in form data case
+    private String getFormData()
+    {
+        String output = "-d ";
+        for (NameValueData data : formDatas)
+        {
+            if (!data.isSelected())
+                continue;
+
+            if (data.getDataName().length() == 0 || data.getDataValue().length() == 0)
+            {
+                JOptionPane.showMessageDialog(THIS, "Some of your given datas for form data are incorrect !", "error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+
+            output = output + data.getDataName() + "=" + data.getDataValue() + "&";
+        }
+
+        
+        if (output.equals("-d ")) return "";
+
+        output = output.substring(0, output.length()-1);
+        return output;
+    }
+
+
+    // This method generate a String for request body in JSON case
+    private String getJson()
+    {
+        String output = "-j ";
+
+        try{ output = output + jsonTextArea.getText(); }
+        catch (NullPointerException e) { return ""; }
+
+        return output;
+    }
+
+
+    // This method generate a String for request body in binary file case
+    public String getBinaryFile()
+    {
+        if (choosenBinaryFileName.getText().equals("No file selected !"))
+            return "";
+
+        return "-u " + choosenBinaryFileName.getText();
+    }
+
 
 
 
@@ -532,6 +640,26 @@ public class NewRequestGUI extends JPanel
         }
 
 
+
+
+                /*  Methods  */
+
+        /**
+         * @return name of this pair
+         */
+        public String getDataName() { return dataNameTextField.getText(); }
+
+        /**
+         * @return value of this pair
+         */
+        public String getDataValue() { return dataValueTextField.getText(); }
+
+        /**
+         * @return {@code true} if this pair selecet to send
+         */
+        public boolean isSelected() { return selectButton.isSelected(); }
+
+
         private class DataEventHandler implements ActionListener, FocusListener
         {
             public void actionPerformed(ActionEvent e)
@@ -541,6 +669,7 @@ public class NewRequestGUI extends JPanel
                 {
                     if (holdPlace.size() > 1)
                     {
+                        holdPlace.get(0).requestFocus();
                         targetPanel.remove(THIS);
                         targetPanel.revalidate();
                         targetPanel.repaint();
@@ -558,9 +687,12 @@ public class NewRequestGUI extends JPanel
                 {
                     JTextField focusedTextField = (JTextField)e.getSource();
 
-                    focusedTextField.setText("");
-                    focusedTextField.setForeground(Color.BLACK);
-                    focusedTextField.setOpaque(true);
+                    if (focusedTextField.getText().equals(bgNameString) || focusedTextField.getText().equals(bgValueString))
+                    {
+                        focusedTextField.setText("");
+                        focusedTextField.setForeground(Color.BLACK);
+                        focusedTextField.setOpaque(true);
+                    }
 
 
                     if (holdPlace.indexOf(THIS) == holdPlace.size()-1)
@@ -592,6 +724,8 @@ public class NewRequestGUI extends JPanel
                         toPutString = bgValueString;
                         
                     focusLostedTextField.setText(toPutString);
+                    focusLostedTextField.setForeground(backTextColor);
+                    focusLostedTextField.setOpaque(true);
                 }
             }
         }
@@ -607,7 +741,7 @@ public class NewRequestGUI extends JPanel
     {
         public void actionPerformed(ActionEvent e) 
         {
-            /*  body kinds combo box event mainHandler */
+            /*  body kinds combo box event mainHandler  */
             if (e.getSource().equals(bodyKindsComboBox))
             {
                 if (bodyKindsComboBox.getSelectedItem().equals("Form data"))
@@ -640,7 +774,22 @@ public class NewRequestGUI extends JPanel
         
         public void focusLost(FocusEvent e) 
         {
-            
+            JTextField focusLostedTextField = (JTextField)e.getSource();
+            if (focusLostedTextField.getText().length() != 0)
+                return;
+
+
+            String toPutString;
+            if (e.getSource().equals(getUrlTextField))
+                toPutString = " https:// ?! ";
+            else if (e.getSource().equals(getTokenTextField))
+                toPutString = " TOKEN . . .";
+            else 
+                toPutString = " PREFIX . . .";
+                
+            focusLostedTextField.setText(toPutString);
+            focusLostedTextField.setForeground(backTextColor);
+            focusLostedTextField.setOpaque(true);
 		}
     }
 }
