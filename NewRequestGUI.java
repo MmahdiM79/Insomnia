@@ -312,10 +312,10 @@ public class NewRequestGUI extends JPanel
 
         if (inputs.contains("-q"))
         {
-            String headers = inputs.get(inputs.indexOf("-q")+1);
+            String query = inputs.get(inputs.indexOf("-q")+1);
 
             NameValueData hold = null;
-            for (String pair : headers.split("&"))
+            for (String pair : query.split("&"))
             {
                 hold = new NameValueData(pair.substring(0, pair.indexOf("=")), 
                                          pair.substring(pair.indexOf("=")+1),
@@ -330,10 +330,10 @@ public class NewRequestGUI extends JPanel
 
         if (inputs.contains("-d"))
         {
-            String headers = inputs.get(inputs.indexOf("-d")+1);
+            String multiPartFormDatas = inputs.get(inputs.indexOf("-d")+1);
 
             NameValueData hold = null;
-            for (String pair : headers.split("&"))
+            for (String pair : multiPartFormDatas.split("&"))
             {
                 hold = new NameValueData(pair.substring(0, pair.indexOf("=")), 
                                          pair.substring(pair.indexOf("=")+1),
@@ -343,6 +343,22 @@ public class NewRequestGUI extends JPanel
                 formDataKindPanel.add(hold);
                 formDatas.add(hold);
             }
+        }
+
+        
+        if (inputs.contains("-j"))
+        {
+            String json = inputs.get(inputs.indexOf("-j")+1);
+
+            jsonTextArea.setText(json);
+        }
+
+
+        if (inputs.contains("-u"))
+        {
+            String path = inputs.get(inputs.indexOf("-u")+1);
+
+            choosenBinaryFileName.setText(path);
         }
     }
 
