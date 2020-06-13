@@ -1,8 +1,6 @@
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 
 
@@ -14,7 +12,7 @@ import java.awt.event.KeyEvent;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.0
+ * @version 0.0.4
  */
 public class ResponseGUI extends JPanel
 {
@@ -34,16 +32,19 @@ public class ResponseGUI extends JPanel
 
     private JPanel messageBodyTabPanel = new JPanel();
 
-    private JComboBox<String> bodyKindsComboBox = new JComboBox<>();
+    private JComboBox<String> viewTypesComboBox = new JComboBox<>();
 
     private JPanel messageBodyShowPanel = new JPanel(); 
 
     private JPanel rawPanel = new JPanel();
 
+    private JTextArea rawTextArea = new JTextArea();
+
     private JPanel headersPanel = new JPanel();
 
 
 
+    private EventHandler handler = new EventHandler();
         
     private Color backgroundColor;
 
@@ -132,12 +133,13 @@ public class ResponseGUI extends JPanel
         responseDetailsTabs.add("Message Body", messageBodyTabPanel); // add body panel
 
 
-        bodyKindsComboBox.setMaximumSize(new Dimension(925, 30));
-        bodyKindsComboBox.setBackground(backgroundColor); // set background color
-        bodyKindsComboBox.setOpaque(true); // apply color changes
-        bodyKindsComboBox.addItem("RAW");
-        bodyKindsComboBox.addItem("Preview");
-        messageBodyTabPanel.add(bodyKindsComboBox, BorderLayout.NORTH);
+        viewTypesComboBox.setMaximumSize(new Dimension(925, 30));
+        viewTypesComboBox.setBackground(backgroundColor); // set background color
+        viewTypesComboBox.setOpaque(true); // apply color changes
+        viewTypesComboBox.addItem("RAW");
+        viewTypesComboBox.addItem("Preview");
+        viewTypesComboBox.addActionListener(handler);
+        messageBodyTabPanel.add(viewTypesComboBox, BorderLayout.NORTH);
 
 
         // set the body edit panel
@@ -150,7 +152,19 @@ public class ResponseGUI extends JPanel
         rawPanel.setLayout(new GridLayout(1, 1, 15, 15)); //set layout manager
         rawPanel.setBackground(backgroundColor); // set background color
         rawPanel.setOpaque(true); // apply color changes
+
+        rawTextArea.setFont(rawTextArea.getFont().deriveFont(15.0f)); // set text size
+        rawTextArea.setBorder(BorderFactory.createLineBorder(backgroundColor, 30));
+        rawTextArea.setEditable(false); 
+        rawPanel.add(rawTextArea); // add text area
+
         messageBodyShowPanel.add("raw", rawPanel); // add body panel
+
+
+        JPanel priviewPanel = new JPanel();
+        priviewPanel.setBackground(backgroundColor);
+        priviewPanel.setOpaque(true);
+        messageBodyShowPanel.add("priview", priviewPanel);
 
 
  
@@ -161,7 +175,39 @@ public class ResponseGUI extends JPanel
 
         
         // set headers table
-        JTable headersTable = new JTable();
+        JButton nameValueLable = new JButton("<html><b>NAME&emsp;&emsp;&emsp;&emsp;|&emsp;&emsp;&emsp;&emsp;VALUE</b></html>");
+        nameValueLable.setHorizontalAlignment(SwingConstants.CENTER);
+        nameValueLable.setBackground(backgroundColor);
+        nameValueLable.setForeground(Color.WHITE);
+        nameValueLable.setFont(nameValueLable.getFont().deriveFont(18.0f));
+        nameValueLable.setMaximumSize(new Dimension(600, 45));
+        nameValueLable.setOpaque(true);
+        nameValueLable.addActionListener(handler);
+        headersPanel.add(nameValueLable);
+    }
+
+
+
+
+
+
+
+
+
+
+    // This class do the event handeling of ResponseGUI class
+    private class EventHandler implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) 
+        {
+            if (e.getSource() == viewTypesComboBox)
+            {
+                if (viewTypesComboBox.getSelectedItem().equals("Preview"))
+                    ((CardLayout) messageBodyShowPanel.getLayout()).show(messageBodyShowPanel, "priview");
+                else if (viewTypesComboBox.getSelectedItem().equals("RAW"))
+                    ((CardLayout) messageBodyShowPanel.getLayout()).show(messageBodyShowPanel, "raw");
+            }
+        }
 
     }
 }
