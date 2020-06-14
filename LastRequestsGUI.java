@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.IOError;
+import java.io.IOException;
 import java.io.Serializable;
 
 
@@ -15,7 +17,7 @@ import java.io.Serializable;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.8
+ * @version 0.2.0
  */
 public class LastRequestsGUI extends JPanel
 {
@@ -111,7 +113,7 @@ public class LastRequestsGUI extends JPanel
         insomniaLabel = new JLabel("   Insomnia        "); // set text
         insomniaLabel.setHorizontalAlignment(SwingConstants.LEFT);
         insomniaLabel.setPreferredSize(new Dimension(170, 50)); // set size
-        insomniaLabel.setFont (insomniaLabel.getFont().deriveFont(22.0f)); // set text size
+        insomniaLabel.setFont(insomniaLabel.getFont().deriveFont(22.0f)); // set text size
         insomniaLabel.setForeground(Color.WHITE); // set text color
         insomniaLabel.setBackground(new Color(102, 96, 178)); // set back ground color
         insomniaLabel.setOpaque(true); // apply color changes
@@ -197,17 +199,55 @@ public class LastRequestsGUI extends JPanel
 
             /*  Methods  */
 
-    public boolean saveRequest(String reqKind, String reqName, String gpName, String reqDetails)
+    /**
+     * This method show the saved request in GUI
+     * 
+     * 
+     * @param reqKind : method of request
+     * @param reqName : name of the request
+     * @param gpName : name of the request group
+     * @param reqDetails : a {@code String} that could set as {@link Jurl#main(String[])}  input
+     */
+    public void saveRequest(String reqKind, String reqName, String gpName, String reqDetails)
     {
-        if (groupsRequests.get(gpName).contains(reqName))
-        {
-            JOptionPane.showMessageDialog(THIS, "This name has already added !", "error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
         requestGroupPanels.get(gpName).add(new ReqeustButton(reqKind, reqName, gpName, reqDetails));
-        return true;
     }
+
+
+    /**
+     * This method load saved request to GUI
+     * 
+     * @param requests : saved requests in DataBase
+     */
+    public void loadRequests(HashMap<String, ArrayList<String>> requests)
+    {
+        int gpCntr = 0, reqCntr = 0; String gpLast;
+        for (String gpName : requests.keySet())
+        {
+            gpLast = gpName;
+            if (!".lastRequestsFolder".equals(gpName))
+                addGroup(gpName);
+            else
+                gpLast = "last requests";
+
+
+            reqCntr = 0;
+            for (String reqName : requests.get(gpName))
+            {
+                try
+                {
+                    Request hold = DataBase.openRequest(gpCntr, reqCntr);
+                    addRequest(gpLast, new ReqeustButton(RequestKinds.getKind(hold.getRequestKind()), reqName, gpLast, hold.getReqDetails()));
+                }
+                catch (IOException e) {}
+
+                reqCntr++;
+            }
+
+            gpCntr++;
+        }
+    }
+
 
 
     // This return true if the client has been choose a name for new Group
@@ -248,8 +288,19 @@ public class LastRequestsGUI extends JPanel
     }
 
 
+    private void addGroup(String gpName)
+    {
+        JPanel newGroupPanel = newEmptyPanel(); // create new panel
+        groupsComboBox.addItem(gpName); // add new group name to combo box
+        requestGroupPanels.put(gpName, newGroupPanel); // add to the hashMap
+        requestGroupsTabs.insertTab(gpName, null, newGroupPanel, null, 1); // add new tab
+    }
 
 
+    private void addRequest(String gpName, ReqeustButton req)
+    {
+        requestGroupPanels.get(gpName).add(req);
+    }
 
 
     
@@ -276,7 +327,7 @@ public class LastRequestsGUI extends JPanel
         private String groupName = null;
 
         // request details (for Jurl main)
-        private ArrayList<String> requestDetailsString = new ArrayList<>(); 
+        private String requestDetailsString = null; 
 
 
 
@@ -292,20 +343,18 @@ public class LastRequestsGUI extends JPanel
             this.requestKind = reqKind;
             this.requestName = reqName;
             this.groupName = gpName;
-            setDetails(reqDetails);
+            this.requestDetailsString = reqDetails;
 
 
-            super.setMaximumSize(new Dimension(170, 50)); // set maximum size of the button
+            super.setMinimumSize(new Dimension(170, 35)); // set maximum size of the button
             super.setFont (super.getFont().deriveFont(12.0f)); // set text size
             super.setForeground(Color.WHITE); // set text color
-            super.setBackground(backgroundColor); // set background color
+            super.setBackground(new Color(153, 153, 153)); // set background color
             super.setOpaque(true);
 
             super.setText(buildButtonText());
 
             super.addActionListener(handler);
-
-            System.out.println(this.getParent());
         }
 
 
@@ -326,16 +375,14 @@ public class LastRequestsGUI extends JPanel
             this.setText(buildButtonText());
         }
 
-        
-
-        // this method read request details from given string
-        private void setDetails(String reqDetails)
+        public String getDetails()
         {
-            String[] details = reqDetails.split(" ");
-
-            for (String detail : details)
-                this.requestDetailsString.add(detail);
+            return requestDetailsString;
         }
+
+
+
+
 
         // return button text
         private String buildButtonText()
@@ -365,18 +412,9 @@ public class LastRequestsGUI extends JPanel
 
 
 
-     // This class do the even handling of LastRequestsGUI class
-    private class EventHandler implements ActionListener, FocusListener, Serializable
+     // This class do the event handling of LastRequestsGUI class
+    private class EventHandler implements ActionListener, FocusListener
     {
-                /*  Field  */
-
-        // serial version UID
-        private static final long serialVersionUID = 2868377327256959L;
-
-
-
-
-
         /**
          * This method handl the event of the add button and remove button
          * 
@@ -403,10 +441,7 @@ public class LastRequestsGUI extends JPanel
                 }
 
 
-                JPanel newGroupPanel = newEmptyPanel(); // create new panel
-                groupsComboBox.addItem(newGroupName); // add new group name to combo box
-                requestGroupPanels.put(newGroupName, newGroupPanel); // add to the hashMap
-                requestGroupsTabs.insertTab(newGroupName, null, newGroupPanel, null, 1); // add new tab
+                addGroup(newGroupName);
             }
             
 
@@ -422,13 +457,16 @@ public class LastRequestsGUI extends JPanel
                 requestGroupsTabs.remove(requestGroupPanels.get(groupNameToRemove)); // remove from tabs
                 requestGroupPanels.remove(groupNameToRemove); // remove from hashMap
                 groupsComboBox.removeItem(groupNameToRemove); // remove from combo box
+
+
+                Insomnia.removeGroup(groupNameToRemove);
             }
 
 
             
             if (e.getSource() instanceof ReqeustButton)
             {
-                System.out.println(((ReqeustButton) e.getSource()).requestName);
+                MainFrame.openRequest(((ReqeustButton) e.getSource()).getDetails());
             }
         }
 
