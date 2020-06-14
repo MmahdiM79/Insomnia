@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
 import java.awt.datatransfer.*;
 
 
@@ -13,57 +17,89 @@ import java.awt.datatransfer.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.6
+ * @version 0.1.0
  */
 public class ResponseGUI extends JPanel
 {
             /*  Fields  */
 
+    // a panel for response time, size and status code
     private JPanel responseStatusPanel = new JPanel();
 
+    // status code of the response
     private JLabel statusCodLabel = new JLabel();
 
+    // time of the response
     private JLabel responseTimeLabel = new JLabel();
 
+    // size of the response content
     private JLabel responseSizeLabel = new JLabel();
 
 
-
+    // a tabbed pane for response details
     private JTabbedPane responseDetailsTabs = new JTabbedPane();
 
-    private JPanel messageBodyTabPanel = new JPanel();
+    
+    // a panel for response body
+    private JPanel responseBodyTabPanel = new JPanel();
 
+    // a combo box for how to show the response body
     private JComboBox<String> viewTypesComboBox = new JComboBox<>();
 
-    private JPanel messageBodyShowPanel = new JPanel(); 
+    // a panel for response body show
+    private JPanel responseBodyShowPanel = new JPanel(); 
 
+
+    // a panel for show response body in raw format
     private JPanel rawPanel = new JPanel();
 
+    // a text area for raw panel
     private JTextArea rawTextArea = new JTextArea();
 
+
+    // a panel for priview
+    private JPanel priviewPanel = new JPanel();
+
+
+    // a panel for response headers
     private JPanel headersPanel = new JPanel();
 
+    // a button for copy all headers
     private JButton nameValueLable = new JButton("<html><b>NAME&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; |&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;VALUE</b></html>");
 
 
+    // a panel for time line
+    private JPanel timeLinePanel = new JPanel();
 
+    // a text area for time line
+    private JTextArea timeLineTextArea = new JTextArea();
+
+
+
+    // a handler for components
     private EventHandler mainHandler = new EventHandler();
         
     private Color backgroundColor;
 
-    private ResponseGUI THIS;
 
 
     
     
 
+
+         /* Constructor */
+
+    /**
+     * Create a frame for respose part
+     * 
+     * @param bgColor : back grouc color
+     */
     public ResponseGUI(Color bgColor) 
     {
         super();
         super.setLayout(new BorderLayout(0, 0)); // set layout manager
         super.setBackground(backgroundColor); // set background color
         super.setOpaque(true); // apply color changes
-        THIS = this;
 
 
 
@@ -130,10 +166,10 @@ public class ResponseGUI extends JPanel
         this.add(responseDetailsTabs, BorderLayout.CENTER);
 
 
-        messageBodyTabPanel.setBackground(backgroundColor); // set background color
-        messageBodyTabPanel.setOpaque(true); // apply color changes
-        messageBodyTabPanel.setLayout(new BorderLayout()); // set layout manager
-        responseDetailsTabs.add("Message Body", messageBodyTabPanel); // add body panel
+        responseBodyTabPanel.setBackground(backgroundColor); // set background color
+        responseBodyTabPanel.setOpaque(true); // apply color changes
+        responseBodyTabPanel.setLayout(new BorderLayout()); // set layout manager
+        responseDetailsTabs.add("Message Body", responseBodyTabPanel); // add body panel
 
 
         viewTypesComboBox.setMaximumSize(new Dimension(925, 30));
@@ -142,14 +178,14 @@ public class ResponseGUI extends JPanel
         viewTypesComboBox.addItem("RAW");
         viewTypesComboBox.addItem("Preview");
         viewTypesComboBox.addActionListener(mainHandler);
-        messageBodyTabPanel.add(viewTypesComboBox, BorderLayout.NORTH);
+        responseBodyTabPanel.add(viewTypesComboBox, BorderLayout.NORTH);
 
 
         // set the body edit panel
-        messageBodyShowPanel.setLayout(new CardLayout()); // set layout manager
-        messageBodyShowPanel.setBackground(backgroundColor); // set the background color
-        messageBodyShowPanel.setOpaque(true); // apply color changes
-        messageBodyTabPanel.add(messageBodyShowPanel, BorderLayout.CENTER); // add edit panel 
+        responseBodyShowPanel.setLayout(new CardLayout()); // set layout manager
+        responseBodyShowPanel.setBackground(backgroundColor); // set the background color
+        responseBodyShowPanel.setOpaque(true); // apply color changes
+        responseBodyTabPanel.add(responseBodyShowPanel, BorderLayout.CENTER); // add edit panel 
 
 
         rawPanel.setLayout(new GridLayout(1, 1, 15, 15)); //set layout manager
@@ -158,16 +194,29 @@ public class ResponseGUI extends JPanel
 
         rawTextArea.setFont(rawTextArea.getFont().deriveFont(15.0f)); // set text size
         rawTextArea.setBorder(BorderFactory.createLineBorder(backgroundColor, 30));
+        rawTextArea.setBackground(backgroundColor);
+        rawTextArea.setForeground(Color.WHITE);
+        rawTextArea.setLineWrap(true);
         rawTextArea.setEditable(false); 
+
         rawPanel.add(rawTextArea); // add text area
 
-        messageBodyShowPanel.add("raw", rawPanel); // add body panel
+        JScrollPane rawPanelScrollPane = new JScrollPane(rawPanel);
+        rawPanelScrollPane.setBackground(backgroundColor);
+        rawPanelScrollPane.setOpaque(true);
+
+        responseBodyShowPanel.add("raw", rawPanelScrollPane); // add body panel
 
 
-        JPanel priviewPanel = new JPanel();
+        
         priviewPanel.setBackground(backgroundColor);
         priviewPanel.setOpaque(true);
-        messageBodyShowPanel.add("priview", priviewPanel);
+
+        JScrollPane priviewPanelScrollPane = new JScrollPane(priviewPanel);
+        priviewPanelScrollPane.setBackground(backgroundColor);
+        priviewPanelScrollPane.setOpaque(true);
+
+        responseBodyShowPanel.add("priview", priviewPanel);
 
 
  
@@ -182,11 +231,167 @@ public class ResponseGUI extends JPanel
         nameValueLable.setBackground(backgroundColor);
         nameValueLable.setForeground(Color.WHITE);
         nameValueLable.setFont(nameValueLable.getFont().deriveFont(18.0f));
-        nameValueLable.setMaximumSize(new Dimension(600, 55));
+        nameValueLable.setMinimumSize(new Dimension(900, 55));
         nameValueLable.setOpaque(true);
         nameValueLable.addActionListener(mainHandler);
         headersPanel.add(nameValueLable);
+
+
+
+        timeLinePanel.setLayout(new GridLayout(1, 1, 15, 15)); //set layout manager
+        timeLinePanel.setBackground(backgroundColor); // set background color
+        timeLinePanel.setOpaque(true); // apply color changes
+
+        timeLineTextArea.setFont(timeLineTextArea.getFont().deriveFont(15.0f)); // set text size
+        timeLineTextArea.setBorder(BorderFactory.createLineBorder(backgroundColor, 30));
+        timeLineTextArea.setBackground(backgroundColor);
+        timeLineTextArea.setForeground(Color.WHITE);
+        timeLineTextArea.setLineWrap(true);
+        timeLineTextArea.setEditable(false); 
+        timeLinePanel.add(timeLineTextArea); // add text area
+
+        JScrollPane timeLinePanelScrollPane = new JScrollPane(timeLinePanel);
+        timeLinePanelScrollPane.setBackground(backgroundColor);
+        timeLinePanelScrollPane.setOpaque(true);
+
+        responseDetailsTabs.add("Time Line", timeLinePanelScrollPane);
     }
+
+
+
+
+
+
+
+
+
+            /*  Method  */
+
+    /**
+     * Set status code in GUI
+     * 
+     * @param responseCode : status code of the request
+     */
+    public void setResponseCode(int responseCode)
+    {
+        Color colorToChange;
+
+        if (responseCode/100 == 2)
+            colorToChange = Color.GREEN;
+
+        else if (responseCode/100 == 3)
+            colorToChange = Color.ORANGE;
+
+        else
+            colorToChange = Color.RED;
+
+
+        statusCodLabel.setBorder(BorderFactory.createLineBorder(colorToChange, 6));
+        statusCodLabel.setBackground(colorToChange);
+        statusCodLabel.setText("" + responseCode);
+    }
+
+
+    /**
+     * Set size of the response content length in GUI
+     * 
+     * @param responseSize : size of the response content
+     */
+    public void setContentLength(int responseSize)
+    {
+        responseSizeLabel.setText("" + responseSize + " kb");
+    }
+
+
+    /**
+     * Set time that request taken to be answered
+     * 
+     * @param time : time in 'ms'
+     */
+    public void setTime(int time)
+    {
+        responseTimeLabel.setText("" + time + " ms");
+    }
+
+
+    /**
+     * This method set the response headers to the GUI
+     * 
+     * @param headers : keys and values of response headers
+     */
+    public void setHeaders(HashMap<String, String> headers)
+    {
+        for (String key : headers.keySet())
+            headersPanel.add(new NameValuedeHeader(key, headers.get(key)));
+    }
+
+
+    /**
+     * This method update the right part of the GUI
+     * 
+     * @param contentType : type of the resposne body
+     */
+    public void update(String contentType)
+    {
+        // time line update
+        try 
+        {
+            FileInputStream timeLineFile = new FileInputStream(new File(DataBase.getTimeLineGuiPath()));
+            timeLineTextArea.setText(new String(timeLineFile.readAllBytes()));
+            timeLineFile.close();
+        }
+        catch (IOException e) {}
+
+
+        // raw update
+        try 
+        {
+            FileInputStream rawFile = new FileInputStream(new File(DataBase.getResponseBodyGuiPath()));
+            rawTextArea.setText(new String(rawFile.readAllBytes()));
+        }
+        catch (IOException e) {}
+
+
+
+        if (contentType.equals("png") || contentType.equals("jpg"))
+        {
+            ImageIcon body = new ImageIcon(DataBase.getResponseBodyGuiPath());
+            JLabel bodylLabel = new JLabel(body);
+            priviewPanel.add(bodylLabel);
+        }
+        else if (contentType.equals("json"))
+        {
+            String body = null;
+            try
+            {
+                body = new String((new FileInputStream(new File(DataBase.getResponseBodyGuiPath()))).readAllBytes());
+            }
+            catch (IOException e) {}
+
+            body = body.substring(1, body.length()-1);
+            String[] pairs = body.split(",");
+
+            String priviewText = "{ ";
+            for (String pair : pairs)
+            {
+                pair = pair.replace(":", ":  ");
+                priviewText = priviewText + "\n\t" + pair;
+            }
+            priviewText = priviewText + "\n}";
+
+
+            JTextArea priviewTextArea = new JTextArea(priviewText);
+            priviewTextArea.setBackground(backgroundColor);
+            priviewTextArea.setForeground(Color.WHITE);
+            priviewTextArea.setOpaque(true);
+
+            priviewPanel.add(priviewTextArea);
+        }
+    }
+
+
+
+
 
 
 
@@ -270,9 +475,9 @@ public class ResponseGUI extends JPanel
             if (e.getSource().equals(viewTypesComboBox))
             {
                 if (viewTypesComboBox.getSelectedItem().equals("Preview"))
-                    ((CardLayout) messageBodyShowPanel.getLayout()).show(messageBodyShowPanel, "priview");
+                    ((CardLayout) responseBodyShowPanel.getLayout()).show(responseBodyShowPanel, "priview");
                 else if (viewTypesComboBox.getSelectedItem().equals("RAW"))
-                    ((CardLayout) messageBodyShowPanel.getLayout()).show(messageBodyShowPanel, "raw");
+                    ((CardLayout) responseBodyShowPanel.getLayout()).show(responseBodyShowPanel, "raw");
             }
 
 
