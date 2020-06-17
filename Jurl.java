@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.*;
-import java.net.*;
-import java.net.http.*;
+
 
 
 
@@ -13,7 +12,7 @@ import java.net.http.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.5
+ * @version 0.3.0
  */
 public class Jurl 
 {
@@ -33,12 +32,10 @@ public class Jurl
                                          "-j", "--json",     // send a json as request body 
                                          "-l", "--list",     // show the list of the request groups
                                          "rm", "--remove",   // remove a request or group
-                                         "so", "--save-over",// override saving
                                                "send",     // send again the given requests
                                                "--help",     // open help text
                                          "-f",               // follow redirect
                                          "-i",               // show the response or not
-
                                          "--GUI--"           // set the outputs to GUI
                                         }; 
 
@@ -48,9 +45,6 @@ public class Jurl
 
     // where to save response body
     private static String outputFileName = null;
-
-    // address of file to upload
-    private static String uploadFilePath = null;
 
     // check that user do anything or not
     private static boolean doSomeThing = false;
@@ -71,6 +65,18 @@ public class Jurl
     private static String bodyDatas = null;
     private static boolean followRedirect = false;
     private static boolean showResponseHeaders = false;
+    private static String reqDetails = null;
+
+
+
+    //  * response details *
+
+    private static int statusCode;
+    private static String responseMessage = "";
+    private static long responseTime;
+    private static long contentLength;
+    private static String contentFormat = "";
+    private static HashMap<String, String> responseHeaders;
 
 
 
@@ -79,11 +85,15 @@ public class Jurl
 
 
 
+
+
+
+             /*  Methods  */
 
 
     public static void main(String[] inputs) throws IOException
     {
-        // set user inputs in a ArrayList
+        // set user inputs in a ArrayList 
         getArgs(inputs);
 
         // check number of the user inputs
@@ -96,7 +106,7 @@ public class Jurl
 
 
         // check that user is using GUI or not 
-        if (args.contains("--GUI--"))
+        if (args.contains("--gui--"))
             terminal = false;
         else    
         {
@@ -134,6 +144,13 @@ public class Jurl
             removeOption();
         }
 
+        // do send option
+        if (args.contains("send"))
+        {
+            doSomeThing = true;
+            sendOption();
+        }
+
         // do list option
         if (args.contains("-l") || args.contains("--list"))
         {
@@ -143,10 +160,10 @@ public class Jurl
 
     
         // check that user has given a url or not
+        if (doSomeThing && isArgDefined(args.get(0)))
+            return;
         if (!doSomeThing && isArgDefined(args.get(0)))
             Out.printErrors("urlFirst");
-        else if (!isArgDefined(args.get(0)) && doSomeThing)
-            return;
 
         
         // set url
@@ -164,7 +181,7 @@ public class Jurl
 
 
         // creat request with user given details
-        if (!method.equals("GET"))
+        if (!method.equalsIgnoreCase("GET"))
             request = new RequestWithBody(name, 
                                           group, 
                                           url, 
@@ -174,10 +191,11 @@ public class Jurl
                                           bodyDatas, 
                                           query, 
                                           followRedirect, 
-                                          showResponseHeaders);
+                                          showResponseHeaders,
+                                          reqDetails);
 
         else
-            request = new Request(name, group, url, headers, query, followRedirect, showResponseHeaders);
+            request = new Request(name, group, url, headers, query, followRedirect, showResponseHeaders, reqDetails);
 
         
 
@@ -190,14 +208,33 @@ public class Jurl
         request.run();
 
 
+
+
+                /*  set response fields  */
+
+        statusCode = 0;
+        responseTime = 0;
+        responseMessage = null;
+        contentLength = 0;
+        responseHeaders = null;
+        statusCode = request.getResponseCode();
+        responseTime = request.getResponseTime();
+        responseMessage = request.getResponseMessage();
+        contentLength = request.getResponseSize();
+        responseHeaders = request.responseHeaders;
+
+        
+
+        try
+        {
+            contentFormat = request.getResponseBodyFormat().substring(1);
+        } catch (NullPointerException e) {contentFormat = ""; }
+
+
+
         // do output option
         if (args.contains("-o") || args.contains("--output"))
             Out.saveOutput(outputFileName, request.getResponseBodyFormat());
-
-
-        // do send option
-        if (args.contains("send"))
-            sendOption();
     }
 
 
@@ -206,19 +243,60 @@ public class Jurl
 
             /*  Methods  */
 
+    /**
+     * @return format of the response content
+     */
+    public static String getContentFormat() { return contentFormat; }
+
+    /** 
+     * @return time of the response
+     */
+    public static long getResponseTime() { return responseTime; }
+
+    /**
+     * @return status code of the response
+     */
+    public static int getStatusCode() { return statusCode; }
+
+    /**
+     * @return message of the response
+     */
+    public static String getResponseMessage() { return responseMessage; }
+
+    /**
+     * @return size of the response content
+     */
+    public static long getContentLength() { return contentLength; }
+
+    /** 
+     * @return response headers
+     */
+    public static HashMap<String, String> getResponseHeaders() { return responseHeaders; }
+
+
+
+
+
+
     // This method add Args to a Arraylist
     private static void getArgs(String[] inputs)
     {
+        args = new ArrayList<>();
+        reqDetails = "";
         for(String arg : inputs)
         {
             if (isArgDefined(arg))
             {
                 Jurl.args.add(arg.toLowerCase());
+                reqDetails = reqDetails + arg + " ";
                 continue;
             }
+            else if (arg.length() == 0)
+                continue;
 
 
             Jurl.args.add(arg);
+            reqDetails = reqDetails + arg + " ";
         }
     }
 
@@ -343,10 +421,14 @@ public class Jurl
 
         String rmCode = args.get(args.indexOf(selectedArg)+1);
         
-        if (rmCode.length() == 2)
-            DataBase.removeRequest(rmCode);
-        else
-            DataBase.removeGroup(rmCode);
+        try
+        {
+            if (rmCode.length() == 2)
+                DataBase.removeRequest(rmCode);
+            else
+                DataBase.removeGroup(rmCode);
+        }
+        catch(IndexOutOfBoundsException e) {Out.printErrors("badEntery", selectedArg);}
     }
 
 
@@ -354,10 +436,6 @@ public class Jurl
     private static void saveOption()
     {
         String selectedArg = args.contains("-s") ? "-s" : "--save";
-        checkHasEntery(selectedArg);
-
-        if (args.contains("so") || args.contains("--save-over"))
-            DataBase.setOverride(true);
 
 
         if (args.indexOf(selectedArg)+2 < args.size() && !isArgDefined(args.get(args.indexOf(selectedArg)+2)))
@@ -365,11 +443,14 @@ public class Jurl
             group = args.get(args.indexOf(selectedArg)+1);
             name = args.get(args.indexOf(selectedArg)+2);
         }
-        else
+        else if (args.indexOf(selectedArg)+1 < args.size() && !isArgDefined(args.get(args.indexOf(selectedArg)+1)))
             name = args.get(args.indexOf(selectedArg)+1);
+        else 
+            name = null;
     }
 
 
+    // this method handle send option
     private static void sendOption()
     {
         checkHasEntery("send");
@@ -406,6 +487,10 @@ public class Jurl
     {
         if (arg == null)
             return false;
+
+
+        if (arg.equals("--GUI--") || arg.equals("--gui--"))
+            return true;
 
 
         arg = arg.toLowerCase();
@@ -483,6 +568,7 @@ public class Jurl
     }
 
 
+
     private static void showHelp()
     {
         System.out.println(
@@ -523,11 +609,6 @@ public class Jurl
         "\t\t use this option to save your request details. \n" + 
         "\t\t if you don't give the group name, your request will save in last requests foder. \n" +
         "\t\t if you don't give the request name, your request will save with a default name. \n\n\n" +
-
-        "\t so, --save-over \n" +
-        "\t\t if you use this file option, your request will save with given name and group, \n" +
-        "\t\t even a request with given name and group is available. \n" +
-        "\t\t this option should use with -s or --save. \n\n\n" +
 
         "\t -d, --data    \"key=value&key1=value1& ...\" \n\n" +
         "\t\t use this method to give your datas for request body. \n" +
