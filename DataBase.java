@@ -13,7 +13,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.5
+ * @version 0.2.6
  */
 public class DataBase 
 {
@@ -80,26 +80,6 @@ public class DataBase
      */
     public static void init()
     {
-                /*  reset gui files  */
-       
-        File holdToRemove;
-
-        holdToRemove = new File(GUI_FOLDER + RESPONSE_BODY);
-        holdToRemove.delete();
-
-        holdToRemove = new File(GUI_FOLDER + RESPONSE_HEADERS);
-        holdToRemove.delete();
-
-        holdToRemove = new File(GUI_FOLDER + TIME_LINE_GUI);
-        holdToRemove.delete();
-
-        holdToRemove = new File(GUI_FOLDER + ERRORS_LOG);
-        holdToRemove.delete();
-
-        setGUIfiles();
-        
-
-
         File setDefaults = new File(MAIN_FOLDER + LAST_REQUESTS_FOLDER);
         setDefaults.mkdirs();
 
@@ -130,6 +110,28 @@ public class DataBase
         // set gui folder
         File guiFolder = new File(GUI_FOLDER);
         guiFolder.mkdirs();
+
+
+
+                /*  reset gui files  */
+
+        setGUIfiles();
+
+        File holdToRemove;
+
+        holdToRemove = new File(GUI_FOLDER + RESPONSE_BODY);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + RESPONSE_HEADERS);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + TIME_LINE_GUI);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + ERRORS_LOG);
+        holdToRemove.delete();
+
+        setGUIfiles();
     }
 
 
