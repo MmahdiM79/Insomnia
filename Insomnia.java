@@ -10,14 +10,24 @@ import java.awt.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.0
+ * @version 0.1.0
  */
-public class Insomnia extends SwingWorker
+public class Insomnia
 {
             /*  Fields  */
 
+    // for send req in swing worker
+    private static BackGroundJurl jurl;
+
+    // a string for Jurl class
+    private static String reqDetailsString = null;
+            
     // follow redirects or not
     private static boolean followRedirects = true;
+
+    // what to do?
+    private static String whatToDo = null;
+
 
 
 
@@ -41,8 +51,32 @@ public class Insomnia extends SwingWorker
     
         MainFrame.MainFrameInit();
         MainFrame.showFrame();
+
+        //jurl = new BackGroundJurl();
     }
 
+
+    
+
+    /**
+     * This class starts the swing worker tread
+     */
+    public static void start()
+    {
+        jurl = new BackGroundJurl(reqDetailsString, followRedirects, whatToDo);
+        jurl.execute();
+    }
+
+
+    /**
+     * This method remove a group
+     * 
+     * @param groupName : name of the group that you want to remove it 
+     */
+    public static void removeGroup(String groupName)
+    {
+       DataBase.deleteGroup(groupName);
+    }
 
 
 
@@ -54,15 +88,15 @@ public class Insomnia extends SwingWorker
     /**
      * @return {@code false} if this request dosen't follow redirects
      */
-    public static boolean getFollowRedirects() { return followRedirects; }
+    public static boolean isFollowRedirects() { return Insomnia.followRedirects; }
 
+    /**
+     * @param reqDetails a {@code String} of new request details
+     */
+    public static void setReqString(String reqDetails) { Insomnia.reqDetailsString = reqDetails; }
 
-
-    @Override
-    protected Object doInBackground() throws Exception 
-    {
-	    // TODO Auto-generated method stub
-	    return null;
-    }
-
+    /**
+     * @param whatToDo : send or save
+     */
+    public static void setWhatToDo(String whatToDo) { Insomnia.whatToDo = whatToDo; }
 }
