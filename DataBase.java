@@ -13,7 +13,7 @@ import java.util.HashMap;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class DataBase 
 {
@@ -59,9 +59,6 @@ public class DataBase
     private static final HashMap<String, ArrayList<String>> GROUPS_REQUESTS = new HashMap<>();
 
 
-    // override files for save or not
-    private static boolean OVERRIDE = false;
-
 
 
 
@@ -83,6 +80,26 @@ public class DataBase
      */
     public static void init()
     {
+                /*  reset gui files  */
+       
+        File holdToRemove;
+
+        holdToRemove = new File(GUI_FOLDER + RESPONSE_BODY);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + RESPONSE_HEADERS);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + TIME_LINE_GUI);
+        holdToRemove.delete();
+
+        holdToRemove = new File(GUI_FOLDER + ERRORS_LOG);
+        holdToRemove.delete();
+
+        setGUIfiles();
+        
+
+
         File setDefaults = new File(MAIN_FOLDER + LAST_REQUESTS_FOLDER);
         setDefaults.mkdirs();
 
@@ -113,27 +130,6 @@ public class DataBase
         // set gui folder
         File guiFolder = new File(GUI_FOLDER);
         guiFolder.mkdirs();
-
-        
-
-                /*  set GUI files  */
-
-        FileOutputStream setFile;
-        try
-        {
-            setFile = new FileOutputStream(new File(GUI_FOLDER + TIME_LINE_GUI));
-            setFile.close();
-
-            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_HEADERS));
-            setFile.close();
-
-            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_BODY));
-            setFile.close();
-
-            setFile = new FileOutputStream(new File(GUI_FOLDER + ERRORS_LOG));
-            setFile.close();
-        }
-        catch(IOException e){ Out.printErrors("guiFiles"); } 
     }
 
 
@@ -154,13 +150,7 @@ public class DataBase
         if (groupName == null)
             groupName = LAST_REQUESTS_FOLDER.replace("/", "");
 
-        else if (GROUPS_REQUESTS.keySet().contains(groupName.toLowerCase()))
-        {
-            if (isFileAvailable(groupName, requestName) && !OVERRIDE)
-                return false;
-        }   
-
-        else
+        else if (!GROUPS_REQUESTS.containsKey(groupName))
         {
             GROUPS_REQUESTS.put(groupName.toLowerCase(), new ArrayList<>());
             mkdir(groupName);
@@ -233,8 +223,16 @@ public class DataBase
     }
 
 
-    public static void removeGroup(String groupCode)
+    /**
+     * This method remove a group with its index
+     * 
+     * 
+     * @param groupCode : index of the group
+     * @throws IndexOutOfBoundsException if the given index is invalid
+     */
+    public static void removeGroup(String groupCode) throws IndexOutOfBoundsException
     {
+        
         String groupName = getGroupName(groupCode.charAt(0) - '0');
 
 
@@ -250,6 +248,28 @@ public class DataBase
 
 
         GROUPS_REQUESTS.remove(groupName);
+    }
+
+
+    /**
+     * This method remove a group with its name
+     * 
+     * 
+     * @param groupName : name of the group
+     */
+    public static void deleteGroup(String groupName)
+    {
+        int gpIndex = 0;
+        for (String group : GROUPS_REQUESTS.keySet())
+        {
+            if (groupName.equals(group))
+            {
+                removeGroup("" + gpIndex);
+                return;
+            }
+
+            gpIndex++;
+        }
     }
 
 
@@ -332,22 +352,32 @@ public class DataBase
     }
 
 
-    /**
-     * If you set the override {@code true}, method {@link DataBase#saveRequest(String, String, Request)}
-     *    will save the given file anyway.
-     * 
-     * @param override
-     */
-    public static void setOverride(boolean override)
+
+
+
+
+
+
+    // This method sets the GUI files
+    private static void setGUIfiles()
     {
-        OVERRIDE = override;
+        FileOutputStream setFile;
+        try
+        {
+            setFile = new FileOutputStream(new File(GUI_FOLDER + TIME_LINE_GUI));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_HEADERS));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(GUI_FOLDER + RESPONSE_BODY));
+            setFile.close();
+
+            setFile = new FileOutputStream(new File(GUI_FOLDER + ERRORS_LOG));
+            setFile.close();
+        }
+        catch(IOException e){ Out.printErrors("guiFiles"); }
     }
-
-
-
-
-
-
 
 
     // this method find the group name with its indes
