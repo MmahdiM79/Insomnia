@@ -3,9 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.io.IOError;
 import java.io.IOException;
-import java.io.Serializable;
+
 
 
 
@@ -17,7 +16,7 @@ import java.io.Serializable;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class LastRequestsGUI extends JPanel
 {
@@ -35,9 +34,6 @@ public class LastRequestsGUI extends JPanel
 
     // hold the Groups panels
     private HashMap<String, JPanel> requestGroupPanels = new HashMap<>();
-
-    // hold request of the groups
-    private HashMap<String, ArrayList<String>> groupsRequests = new HashMap<>();
 
     // add group tab panel
     private JPanel addGroupTabPanel;
@@ -249,6 +245,29 @@ public class LastRequestsGUI extends JPanel
     }
 
 
+    /**
+     * @return a combo box of groups
+     */
+    public JComboBox<String> getGroupsComboBox()
+    {
+        JComboBox<String> output = new JComboBox<>();
+        output.setPreferredSize(new Dimension(193, 33)); // set size
+        output.setFont(output.getFont().deriveFont(15.0f)); // set text size
+
+        for (String group : requestGroupPanels.keySet())
+            if (group.equals("+") || group.equals("-"))
+                continue;
+            else
+                output.addItem(group);
+            
+
+        return output;
+    }
+
+
+
+
+
 
     // This return true if the client has been choose a name for new Group
     private boolean isNewGroupNameEmpty()
@@ -288,6 +307,7 @@ public class LastRequestsGUI extends JPanel
     }
 
 
+    // this method add new group by its name
     private void addGroup(String gpName)
     {
         JPanel newGroupPanel = newEmptyPanel(); // create new panel
@@ -297,6 +317,7 @@ public class LastRequestsGUI extends JPanel
     }
 
 
+    // this method add a request to its group panel
     private void addRequest(String gpName, ReqeustButton req)
     {
         requestGroupPanels.get(gpName).add(req);
@@ -304,6 +325,8 @@ public class LastRequestsGUI extends JPanel
 
 
     
+
+
 
 
 
@@ -336,11 +359,20 @@ public class LastRequestsGUI extends JPanel
 
              /* Constructor */
 
+        /**
+         * Create a new button for a request
+         * 
+         * 
+         * @param reqKind : method of the request
+         * @param reqName : a name for this request
+         * @param gpName : name of the this request group
+         * @param reqDetails : a string of this request detials
+         */
         public ReqeustButton(String reqKind, String reqName, String gpName, String reqDetails)
         {
             super();
 
-            this.requestKind = reqKind;
+            this.requestKind = reqKind.toUpperCase();
             this.requestName = reqName;
             this.groupName = gpName;
             this.requestDetailsString = reqDetails;
@@ -348,7 +380,7 @@ public class LastRequestsGUI extends JPanel
 
             super.setMinimumSize(new Dimension(170, 35)); // set maximum size of the button
             super.setFont (super.getFont().deriveFont(12.0f)); // set text size
-            super.setForeground(Color.WHITE); // set text color
+            super.setForeground(Color.BLACK); // set text color
             super.setBackground(new Color(153, 153, 153)); // set background color
             super.setOpaque(true);
 
@@ -365,20 +397,9 @@ public class LastRequestsGUI extends JPanel
                 /*  Methods  */
 
         /**
-         * This method change the request button method
-         * 
-         * @param newMethod : new method of the request to send
+         * @return details of this request
          */
-        public void changeMethod(String newMethod)
-        {
-            this.requestKind = newMethod;
-            this.setText(buildButtonText());
-        }
-
-        public String getDetails()
-        {
-            return requestDetailsString;
-        }
+        public String getDetails() { return requestDetailsString; }
 
 
 
@@ -388,7 +409,7 @@ public class LastRequestsGUI extends JPanel
         private String buildButtonText()
         {
             String colorCode = null;
-            switch (this.requestKind)
+            switch (this.requestKind.toUpperCase())
             {
                 case "GET": colorCode = "rgb(121, 108, 197)"; break;
                 case "POST": colorCode = "rgb(121, 168, 70)"; break;
@@ -403,6 +424,7 @@ public class LastRequestsGUI extends JPanel
                     "&emsp;&emsp;&emsp;&emsp;</b>" + requestName + "</html>";
         }
     }
+
 
 
 
@@ -463,7 +485,7 @@ public class LastRequestsGUI extends JPanel
             }
 
 
-            
+            /* request button case */
             if (e.getSource() instanceof ReqeustButton)
             {
                 MainFrame.openRequest(((ReqeustButton) e.getSource()).getDetails());
