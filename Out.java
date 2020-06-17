@@ -2,7 +2,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Scanner;
 
 
 
@@ -14,7 +13,7 @@ import java.util.Scanner;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.2
+ * @version 0.3.0
  */
 public final class Out 
 {
@@ -22,12 +21,6 @@ public final class Out
 
     // a file for showing time line
     private static PrintStream TIME_LINE;
-
-    // a file for showing response headers
-    private static PrintStream RESPONSE_HEADERS;   
-
-    // a file for showing response body
-    private static PrintStream RESPONSE_BODY;
 
     // a file for saveing the errors log
     private static PrintStream ERRORS_LOG;
@@ -57,22 +50,17 @@ public final class Out
 
         if (terminal)
         {
-            TIME_LINE = RESPONSE_HEADERS = ERRORS_LOG = System.out;
+            TIME_LINE = ERRORS_LOG = System.out;
         }
         else
         {
             try
             { 
                 TIME_LINE = new PrintStream(new File(DataBase.getTimeLineGuiPath()));
-                RESPONSE_HEADERS = new PrintStream(new File(DataBase.getResponseHeadersGuiPath())); 
                 ERRORS_LOG = new PrintStream(new File(DataBase.getErrorsLogGuiPath()));
             }
             catch(FileNotFoundException e) { printErrors("guiFiles"); }
         }
-
-
-        try { RESPONSE_BODY = new PrintStream(new File(DataBase.getResponseBodyGuiPath())); }
-        catch(FileNotFoundException e) { printErrors("guiFiles"); }
     }   
 
 
@@ -116,22 +104,22 @@ public final class Out
      */
     public static void printResponseDetails(Request request)
     {
-        RESPONSE_HEADERS.println("\n\n  ------ Response Details ------  \n");
+        TIME_LINE.println("\n\n  ------ Response Details ------  \n");
 
 
-        RESPONSE_HEADERS.println(" " + request.getResponseHeader("details") + "  " + request.getResponseTime() + " ms");
+        TIME_LINE.println(" " + request.getResponseHeader("details") + "  " + request.getResponseTime() + " ms");
         
         for (String key : request.getResponseHeaders())
         {
             if (key.equals("details"))
                 continue;
 
-            RESPONSE_HEADERS.println(key + ":  " + request.getResponseHeader(key));
+            TIME_LINE.println(key + ":  " + request.getResponseHeader(key));
         }
 
 
 
-        RESPONSE_HEADERS.print("\n\n\n");
+        TIME_LINE.print("\n\n\n");
     }
 
 
@@ -144,7 +132,7 @@ public final class Out
      * 
      * @throws IOException if can't read from given stream
      */
-    public static double printResponseBody(InputStream connectionInputStream) throws IOException
+    public static long printResponseBody(InputStream connectionInputStream) throws IOException
     {
         InputStream in = connectionInputStream;
         byte[] byts = null;
@@ -161,7 +149,7 @@ public final class Out
                 System.out.print((char) b);
 
         File responseBodyFile = new File(DataBase.getResponseBodyGuiPath());
-        return responseBodyFile.length() / 1024f; 
+        return responseBodyFile.length() / 1024; 
     }
 
 
@@ -446,7 +434,10 @@ public final class Out
             System.exit(0);
         }
         else
+        {
             ERRORS_LOG.print(whichCase + "\n" + errorFactor + "\n");
+            MainFrame.showError();
+        }
     }
 
 
@@ -460,7 +451,6 @@ public final class Out
      *          'query',
      *          'save',
      *          'reqbody',
-     *          'invalidArg',
      *          'GET', 
      *          'invalidBodyKind'
      *          'noBodyKind', 
