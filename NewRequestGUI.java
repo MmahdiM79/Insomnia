@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -15,7 +16,7 @@ import java.util.ArrayList;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.1
+ * @version 0.3.0
  */
 public class NewRequestGUI extends JPanel
 {
@@ -24,6 +25,10 @@ public class NewRequestGUI extends JPanel
 
     // requset kind combo box
     private JComboBox<String> requestKindComboBox = new JComboBox<>();
+    private static final String GET = "<html><p style=\"color:rgb(121, 108, 197);\"> GET </p></html>";
+    private static final String PUT = "<html><p style=\"color:rgb(197, 122, 46);\"> PUT </p></html>";
+    private static final String POST = "<html><p style=\"color:rgb(121, 168, 70);\"> POST </p></html>";
+    private static final String DELETE = "<html><p style=\"color:rgb(193, 78, 73);\"> DELET </p></html>"; 
 
     // get url text field
     private JTextField getUrlTextField = new JTextField(" https:// ?! ");
@@ -100,6 +105,8 @@ public class NewRequestGUI extends JPanel
 
     // a pointer to this object
     private NewRequestGUI THIS;
+
+    private String reqDetails = null;
 
     // Event handler of buttons
     private EventHandler mainHandler = new EventHandler();
@@ -196,7 +203,26 @@ public class NewRequestGUI extends JPanel
      */
     public String getMethod()
     {
-        return " -m " + requestKindComboBox.getSelectedObjects();
+        String method;
+        switch ((String) requestKindComboBox.getSelectedItem())
+        {
+            case POST:
+                method = "post";
+            break;
+
+            case PUT:
+                method = "put";
+            break;
+
+            case DELETE:
+                method = "delete";
+            break;
+
+            default:
+                method = "get";
+        }
+
+        return " -m " + method;
     }
 
 
@@ -205,13 +231,13 @@ public class NewRequestGUI extends JPanel
      */
     public String getHeaders()
     {
-        String output = "";
+        String output = " -h ";
         for (NameValueData data : headerDatas)
         {
             if (!data.isSelected())
                 continue;
 
-            if (data.getDataName().length() == 0 || data.getDataValue().length() == 0)
+            if (data.getDataName().equals("new header ...") || data.getDataValue().equals("new value ..."))
             {
                 JOptionPane.showMessageDialog(THIS, "Some of your choosen headers are incorrect !", "error", JOptionPane.ERROR_MESSAGE);
                 return null;
@@ -220,9 +246,11 @@ public class NewRequestGUI extends JPanel
             output = output + data.getDataName() + ":" + data.getDataValue() + ",";
         }
 
-        if (output.length() != 0)
-            output = output.substring(0, output.length()-1);
-        return output;
+
+        if (output.equals(" -h "))
+            return "";
+
+         return output.substring(0, output.length()-1);
     }
 
 
@@ -231,13 +259,13 @@ public class NewRequestGUI extends JPanel
      */
     public String getQuery()
     {
-        String output = "";
+        String output = " -q ";
         for (NameValueData data : queryDatas)
         {
             if (!data.isSelected())
                 continue;
 
-            if (data.getDataValue().length() == 0)
+            if (data.getDataValue().equals("new value ..."))
             {
                 JOptionPane.showMessageDialog(THIS, "Your Query is incorrect !", "error", JOptionPane.ERROR_MESSAGE);
                 return null;
@@ -246,9 +274,10 @@ public class NewRequestGUI extends JPanel
             output = output + data.getDataName() + "=" + data.getDataValue() + "&";
         }
 
-        if (output.length() != 0)
-            output = output.substring(0, output.length()-1);
-        return output;
+        if (output.equals(" -q "))
+            return "";
+
+        return output.substring(0, output.length()-1);
     }
 
 
@@ -281,7 +310,7 @@ public class NewRequestGUI extends JPanel
      */
     public void setPanel(String detatils)
     {
-        String[] args = detatils.split("");
+        String[] args = detatils.split(" ");
         ArrayList<String> inputs = new ArrayList<>();
         for (String arg : args)
             inputs.add(arg);
@@ -289,12 +318,35 @@ public class NewRequestGUI extends JPanel
 
         getUrlTextField.setText(args[0]);
 
-        requestKindComboBox.setSelectedItem(inputs.get(inputs.indexOf("-m")+1));
+        
+        switch (inputs.get(inputs.indexOf("-m")+1).toLowerCase())
+        {
+            case "post":
+                requestKindComboBox.setSelectedItem(GET);
+            break;
+
+            case "put":
+                requestKindComboBox.setSelectedItem(PUT);
+            break;
+
+            case "delete":
+                requestKindComboBox.setSelectedItem(DELETE);
+            break;
+
+
+            default: requestKindComboBox.setSelectedItem(GET);
+        }
+        
+            
 
 
         if (inputs.contains("-h"))
         {
             String headers = inputs.get(inputs.indexOf("-h")+1);
+
+            headerTabPanel.removeAll();
+            for (int i = 0; i < headerDatas.size();)
+                headerDatas.remove(0);
 
             NameValueData hold = null;
             for (String pair : headers.split(","))
@@ -308,11 +360,25 @@ public class NewRequestGUI extends JPanel
                 headerDatas.add(hold);
             }
         }
+        else
+        {
+            headerTabPanel.removeAll();
+            for (int i = 0; i < headerDatas.size();)
+                headerDatas.remove(0);
+
+            NameValueData hold = new NameValueData("new header ...", "new value ...", headerTabPanel, headerDatas);
+            headerTabPanel.add(hold);
+            headerDatas.add(hold);
+        }
 
 
         if (inputs.contains("-q"))
         {
             String query = inputs.get(inputs.indexOf("-q")+1);
+
+            queryTabPanel.removeAll();
+            for (int i = 0; i < queryDatas.size();)
+               queryDatas.remove(0);
 
             NameValueData hold = null;
             for (String pair : query.split("&"))
@@ -326,11 +392,26 @@ public class NewRequestGUI extends JPanel
                 queryDatas.add(hold);
             }
         }
+        else
+        {
+            queryTabPanel.removeAll();
+            for (int i = 0; i < queryDatas.size();)
+               queryDatas.remove(0);
+
+            NameValueData hold = new NameValueData("new name ...", "new value ...", queryTabPanel, queryDatas);
+            queryTabPanel.add(hold);
+            queryDatas.add(hold);
+        }
+
 
 
         if (inputs.contains("-d"))
         {
             String multiPartFormDatas = inputs.get(inputs.indexOf("-d")+1);
+
+            formDataKindPanel.removeAll();
+            for (int i = 0; i < formDatas.size();)
+                formDatas.remove(0);
 
             NameValueData hold = null;
             for (String pair : multiPartFormDatas.split("&"))
@@ -344,6 +425,17 @@ public class NewRequestGUI extends JPanel
                 formDatas.add(hold);
             }
         }
+        else
+        {
+            formDataKindPanel.removeAll();
+            for (int i = 0; i < formDatas.size();)
+                formDatas.remove(0);
+
+            NameValueData hold = new NameValueData("new name ...", "new value ...", formDataKindPanel, formDatas);
+            formDataKindPanel.add(hold);
+            formDatas.add(hold);
+        }
+
 
         
         if (inputs.contains("-j"))
@@ -352,6 +444,8 @@ public class NewRequestGUI extends JPanel
 
             jsonTextArea.setText(json);
         }
+        else
+            jsonTextArea.setText("");
 
 
         if (inputs.contains("-u"))
@@ -360,6 +454,8 @@ public class NewRequestGUI extends JPanel
 
             choosenBinaryFileName.setText(path);
         }
+        else 
+            choosenBinaryFileName.setText("No file selected !");
     }
 
 
@@ -383,10 +479,10 @@ public class NewRequestGUI extends JPanel
 
         // set the kind combo box
         requestKindComboBox.setPreferredSize(new Dimension(92, 50)); // set size 
-        requestKindComboBox.addItem("<html><p style=\"color:rgb(121, 108, 197);\"> GET </p></html>");
-        requestKindComboBox.addItem("<html><p style=\"color:rgb(121, 168, 70);\"> POST </p></html>");
-        requestKindComboBox.addItem("<html><p style=\"color:rgb(197, 122, 46);\"> PUT </p></html>");
-        requestKindComboBox.addItem("<html><p style=\"color:rgb(193, 78, 73);\"> DELET </p></html>");
+        requestKindComboBox.addItem(GET);
+        requestKindComboBox.addItem(POST);
+        requestKindComboBox.addItem(PUT);
+        requestKindComboBox.addItem(DELETE);
         requestKindComboBox.setFont(requestKindComboBox.getFont().deriveFont(15.0f)); // set the text size
         requestKindComboBox.setBackground(Color.WHITE); // set background color
         requestKindComboBox.setForeground(new Color(102, 96, 178)); // set foreground color
@@ -504,7 +600,6 @@ public class NewRequestGUI extends JPanel
         choosenBinaryFileName.setFont(choosenBinaryFileName.getFont().deriveFont(14.0f)); // set text size
         choosenBinaryFileName.setBackground(Color.WHITE); // set back ground color
         choosenBinaryFileName.setOpaque(true); // apply color changes
-        choosenBinaryFileName.addFocusListener(mainHandler);
         binaryFileKindPanel.add(choosenBinaryFileName); // add to the binary file panel
         
         
@@ -513,7 +608,6 @@ public class NewRequestGUI extends JPanel
         resetChoosenFileButton.setBackground(backgroundColor); resetChoosenFileButton.setForeground(Color.RED);
         resetChoosenFileButton.setOpaque(true); // apply color changes
         resetChoosenFileButton.addActionListener(mainHandler);
-        resetChoosenFileButton.addFocusListener(mainHandler);
         binaryFileKindPanel.add(resetChoosenFileButton); // add to the binary file panel
 
         
@@ -522,7 +616,6 @@ public class NewRequestGUI extends JPanel
         chooseFileButton.setBackground(backgroundColor); chooseFileButton.setForeground(Color.GREEN);
         chooseFileButton.setOpaque(true); // apply color changes
         chooseFileButton.addActionListener(mainHandler);
-        chooseFileButton.addFocusListener(mainHandler);
         binaryFileKindPanel.add(chooseFileButton); // add to the binary panel
     }
 
@@ -561,13 +654,13 @@ public class NewRequestGUI extends JPanel
     // This method generate a String for request body in form data case
     private String getFormData()
     {
-        String output = "-d ";
+        String output = " -d ";
         for (NameValueData data : formDatas)
         {
             if (!data.isSelected())
                 continue;
 
-            if (data.getDataName().length() == 0 || data.getDataValue().length() == 0)
+            if (data.getDataName().equals("new name ...") || data.getDataValue().equals("new value ..."))
             {
                 JOptionPane.showMessageDialog(THIS, "Some of your given datas for form data are incorrect !", "error", JOptionPane.ERROR_MESSAGE);
                 return null;
@@ -577,7 +670,7 @@ public class NewRequestGUI extends JPanel
         }
 
         
-        if (output.equals("-d ")) return "";
+        if (output.equals(" -d ")) return "";
 
         output = output.substring(0, output.length()-1);
         return output;
@@ -587,9 +680,15 @@ public class NewRequestGUI extends JPanel
     // This method generate a String for request body in JSON case
     private String getJson()
     {
-        String output = "-j ";
+        String output = " -j ";
 
-        try{ output = output + jsonTextArea.getText(); }
+        try
+        { 
+            output = output + jsonTextArea.getText(); 
+
+            if (output.equals(" -j "))
+                return "";
+        }
         catch (NullPointerException e) { return ""; }
 
         return output;
@@ -597,15 +696,16 @@ public class NewRequestGUI extends JPanel
 
 
     // This method generate a String for request body in binary file case
-    public String getBinaryFile()
+    private String getBinaryFile()
     {
         if (choosenBinaryFileName.getText().equals("No file selected !"))
             return "";
 
-        return "-u " + choosenBinaryFileName.getText();
+        return " -u " + choosenBinaryFileName.getText();
     }
 
 
+    
 
 
 
@@ -826,6 +926,15 @@ public class NewRequestGUI extends JPanel
     // This class do the even handling of NewRequestGUI class
     private class EventHandler implements ActionListener, FocusListener
     {
+        private JFrame getNameFrame;
+        private JPanel getNamePanel;
+        private JTextField getNameTextField;
+        private JComboBox<String> getGroupComboBox;
+        private JButton saveNewButton;
+
+
+
+
         public void actionPerformed(ActionEvent e) 
         {
             /*  body kinds combo box event mainHandler  */
@@ -841,14 +950,90 @@ public class NewRequestGUI extends JPanel
                     ((CardLayout) bodyTabSubPanel.getLayout()).show(bodyTabSubPanel, "b");
             }
 
-            return;
+            
+            if (e.getSource().equals(sendButton))
+            {
+                System.out.println("send button action");
+                setReqDetailsString();
+                Insomnia.setReqString(reqDetails);
+                Insomnia.setWhatToDo("send");
+                Insomnia.start();
+            }
+
+
+            if (e.getSource().equals(saveButton))
+            {
+                getNameFrame = new JFrame();  
+                getNameFrame.setLocationRelativeTo(THIS);
+                getNameFrame.setMinimumSize(new Dimension(300, 150));
+                getNameFrame.setLocation(550, 250);
+                getNameFrame.setResizable(false);
+
+                getNamePanel = new JPanel(new GridLayout(3, 1, 10, 10));
+                getNamePanel.requestDefaultFocus();
+                getNamePanel.setFocusable(true);
+                getNameFrame.add(getNamePanel);
+
+                getNameTextField = new JTextField("new reqeust name ...");
+                getNameTextField.addFocusListener(this);
+                getNamePanel.add(getNameTextField);
+
+                getGroupComboBox = MainFrame.getGroups();
+                getNamePanel.add(getGroupComboBox);
+
+                saveNewButton = new JButton("save");
+                saveNewButton.addActionListener(this);
+                getNamePanel.add(saveNewButton);
+
+                getNameFrame.setVisible(true);
+            }
+
+
+            if (e.getSource().equals(saveNewButton))
+            {
+                String reqName = getNameTextField.getText();
+                String gpName = (String) getGroupComboBox.getSelectedItem();
+
+                if (gpName.equals("last requests"))
+                    gpName = "";
+                
+
+                setReqDetailsString();
+                reqDetails = reqDetails + " -s " + gpName + " " + reqName;
+
+                getNameFrame.setVisible(false);
+
+                MainFrame.save(gpName, reqName, getMethod().substring(4), reqDetails);
+
+    
+                Insomnia.setReqString(reqDetails);
+                Insomnia.setWhatToDo("save");
+                Insomnia.start();
+            }
+
+
+            if (e.getSource().equals(chooseFileButton))
+            {
+                JFileChooser jfc = new JFileChooser();
+                jfc.setBackground(backgroundColor);
+                jfc.showOpenDialog(binaryFileKindPanel);
+
+                File holdToGetPath = jfc.getSelectedFile();
+                choosenBinaryFileName.setText(holdToGetPath.getAbsolutePath());
+            }
+
+
+            if (e.getSource().equals(resetChoosenFileButton))
+            {
+                choosenBinaryFileName.setText("No file selected !");
+            }
         }
 
 
 
         public void focusGained(FocusEvent e) 
         {
-            if (e.getSource() instanceof JTextField)
+            if (e.getSource() instanceof JTextField && !(e.getSource().equals(getUrlTextField)))
             {
                 JTextField focusedTextField = (JTextField)e.getSource();
 
@@ -861,22 +1046,33 @@ public class NewRequestGUI extends JPanel
         
         public void focusLost(FocusEvent e) 
         {
+            if (e.getSource() instanceof JButton)
+                return;
+
             JTextField focusLostedTextField = (JTextField)e.getSource();
             if (focusLostedTextField.getText().length() != 0)
                 return;
 
 
-            String toPutString;
+            String toPutString = null;
             if (e.getSource().equals(getUrlTextField))
                 toPutString = " https:// ?! ";
-            else if (e.getSource().equals(getTokenTextField))
-                toPutString = " TOKEN . . .";
-            else 
-                toPutString = " PREFIX . . .";
+            else if (e.getSource().equals(getNameTextField))
+                toPutString = "new reqeust name ...";
                 
             focusLostedTextField.setText(toPutString);
             focusLostedTextField.setForeground(backTextColor);
             focusLostedTextField.setOpaque(true);
-		}
+        }
+        
+
+
+
+        // This method set the request detail string
+        private void setReqDetailsString()
+        {
+            reqDetails = "" + getUrl() + getMethod() + getHeaders() + getQuery() + getBody();
+        }
+
     }
 }
