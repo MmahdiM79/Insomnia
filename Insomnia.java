@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
 
 
 
@@ -10,7 +9,7 @@ import java.awt.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.1.2
  */
 public class Insomnia
 {
@@ -51,8 +50,6 @@ public class Insomnia
     
         MainFrame.MainFrameInit();
         MainFrame.showFrame();
-
-        //jurl = new BackGroundJurl();
     }
 
 
