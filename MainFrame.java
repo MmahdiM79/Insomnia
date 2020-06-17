@@ -1,8 +1,9 @@
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.io.*;
 
 
 
@@ -10,10 +11,12 @@ import java.awt.event.KeyEvent;
 
 /**
  * This class is the main frame of the app
+ * This class is a connector between difrent parts of gui
+ * 
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.0.0
+ * @version 0.1.0
  */
 public class MainFrame 
 {
@@ -22,11 +25,44 @@ public class MainFrame
     // main frame
     private static JFrame frame = new JFrame(" Insomnia ");
 
+
+
     // request details panel
-    private static JPanel requestDetailsPanel = new JPanel();
+    private static LastRequestsGUI lastRequestsPanel;
+
+    // new request panel
+    private static NewRequestGUI newRequestPanel;
 
     // response panel
-    private static JPanel responsePanel = new JPanel();
+    private static ResponseGUI responsePanel;
+
+
+
+    // menu bar of main fram
+    private static MenuBar frameMenuBar = new MenuBar();
+
+
+    // application menu
+    private static Menu applicationMenu = new Menu("Application");
+    private static MenuItem followRedirectsItem = new MenuItem("Follow redirects:   ☑️");
+
+
+    // view menu
+    private static Menu viewMenu = new Menu("View");
+    private static MenuItem toggleFullScreenItem = new MenuItem("Toggle Full Screen");
+    private static MenuItem toggleSidebarItem = new MenuItem("Toggle Sidebar");
+
+
+    // help  menu
+    private static Menu helpMenu = new Menu("Help");
+    private static MenuItem aboutItem = new MenuItem("About");
+    private static MenuItem helpItem = new MenuItem("Help");
+
+
+
+
+    // a handler for events
+    private static EventHandler handler = new EventHandler();
 
     // background color of panels
     private static Color backgroundColor = new Color(46, 47, 44);
@@ -34,6 +70,8 @@ public class MainFrame
 
 
    
+
+
 
     
     
@@ -47,222 +85,93 @@ public class MainFrame
     {
         // set the frame
         frame.setLayout(new BorderLayout()); // set frame layout
-        frame.setMinimumSize(new Dimension(850, 400)); // set minimum size
-        frame.setLocationByPlatform(true);
+        frame.setMinimumSize(new Dimension(1200, 600)); // set minimum size
+        frame.setLocation(150, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+        
 
 
+
+        // create last requests panel
+        lastRequestsPanel = new LastRequestsGUI(backgroundColor);
+        frame.add(lastRequestsPanel, BorderLayout.WEST);
+
+        // create new request panel
+        newRequestPanel = new NewRequestGUI(backgroundColor);
+        frame.add(newRequestPanel, BorderLayout.CENTER);
+
+        // create last request panel
+        responsePanel = new ResponseGUI(backgroundColor);
+        frame.add(responsePanel, BorderLayout.EAST);
+       
+
+        // load last requests
+        DataBase.init();
+        lastRequestsPanel.loadRequests(DataBase.getRequests());
 
         
-        /* set the new requests details panel */
-        {
-            
-        }
+        // set application menu
+        applicationMenu.setShortcut(new MenuShortcut(KeyEvent.VK_1, false));
+        followRedirectsItem.setShortcut(new MenuShortcut(KeyEvent.VK_R, false));
+        followRedirectsItem.addActionListener(handler);
+        applicationMenu.add(followRedirectsItem);
+
+
+        // set view menu
+        viewMenu.setShortcut(new MenuShortcut(KeyEvent.VK_2, false));
+        toggleFullScreenItem.setShortcut(new MenuShortcut(KeyEvent.VK_U, false));
+        toggleFullScreenItem.addActionListener(handler);
+        viewMenu.add(toggleFullScreenItem);
+        toggleSidebarItem.setShortcut(new MenuShortcut(KeyEvent.VK_L, false));
+        toggleSidebarItem.addActionListener(handler);
+        viewMenu.add(toggleSidebarItem);
 
 
 
-        /*  set request response part  */
-        {
-            // set response panel
-            responsePanel.setLayout(new BorderLayout(0, 0)); // set layout manager
-            responsePanel.setBackground(backgroundColor); // set background color
-            responsePanel.setOpaque(true); // apply color changes
-            frame.add(responsePanel, BorderLayout.EAST); // add to the frame
+        // set help menu
+        helpMenu.setShortcut(new MenuShortcut(KeyEvent.VK_3, false));
+        aboutItem.setShortcut(new MenuShortcut(KeyEvent.VK_B, false));
+        aboutItem.addActionListener(handler);
+        helpMenu.add(aboutItem);
+        helpItem.setShortcut(new MenuShortcut(KeyEvent.VK_P, false));
+        helpItem.addActionListener(handler);
+        helpMenu.add(helpItem);
 
 
-            // set response status panel
-            {
-            
-            JPanel responseStatusPanel = new JPanel(); // create new panel
-            responseStatusPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10)); // set layout manager
-            responseStatusPanel.setBackground(Color.WHITE); // set back ground color
-            responseStatusPanel.setOpaque(true); // apply color changes
-            responsePanel.add(responseStatusPanel, BorderLayout.NORTH); // add to response panel
-
-
-            // set status code label
-            JLabel statusCodLabel = new JLabel("200 OK"); // create new label
-            statusCodLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
-            statusCodLabel.setFont(statusCodLabel.getFont().deriveFont(14.5f)); // set text size
-            statusCodLabel.setMinimumSize(new Dimension(60, 30)); // set size
-            statusCodLabel.setBorder(BorderFactory.createLineBorder(new Color(133, 183, 66), 6)); // set border
-            statusCodLabel.setBackground(new Color(133, 183, 66));
-            statusCodLabel.setForeground(Color.WHITE);
-            statusCodLabel.setOpaque(true); // apply color changes
-            responseStatusPanel.add(statusCodLabel); // add to panel
-
-            // set time label
-            JLabel responseTimeLabel = new JLabel("882ms"); // create new label
-            responseTimeLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
-            responseTimeLabel.setFont(responseTimeLabel.getFont().deriveFont(14.5f)); // set text size
-            responseTimeLabel.setMinimumSize(new Dimension(60, 30)); // set size
-            responseTimeLabel.setBorder(BorderFactory.createLineBorder(new Color(224, 224, 224), 6)); // set border
-            responseTimeLabel.setBackground(new Color(224, 224, 224));
-            responseTimeLabel.setForeground(new Color(102, 102, 102));
-            responseTimeLabel.setOpaque(true); // apply color changes
-            responseStatusPanel.add(responseTimeLabel); // add to panel
-
-            // set size label
-            JLabel responseSizeLabel = new JLabel("50 KB"); // create new label
-            responseSizeLabel.setHorizontalAlignment(SwingConstants.CENTER); // set alignment
-            responseSizeLabel.setFont(responseSizeLabel.getFont().deriveFont(14.5f)); // set text size
-            responseSizeLabel.setMinimumSize(new Dimension(60, 30)); // set size
-            responseSizeLabel.setBorder(BorderFactory.createLineBorder(new Color(224, 224, 224), 6)); // set border
-            responseSizeLabel.setBackground(new Color(224, 224, 224));
-            responseSizeLabel.setForeground(new Color(102, 102, 102));
-            responseSizeLabel.setOpaque(true); // apply color changes
-            responseStatusPanel.add(responseSizeLabel); // add to panel
-
-            // set space label
-            JLabel spacLabel = new JLabel();
-            spacLabel.setPreferredSize(new Dimension(200, 30));
-            spacLabel.setBackground(Color.WHITE);
-            spacLabel.setOpaque(true);
-            responseStatusPanel.add(spacLabel);
-
-
-            // set response details
-            {
-
-                // set tabs 
-                JTabbedPane responseDetailsTabs = new JTabbedPane();
-                responseDetailsTabs.setBackground(backgroundColor);
-                responseDetailsTabs.setOpaque(true);
-                responsePanel.add(responseDetailsTabs, BorderLayout.CENTER);
-
-
-                // set the message body tab
-                {
-
-                JPanel messageBodyPanel = new JPanel(); // creat new panel
-                messageBodyPanel.setBackground(backgroundColor); // set background color
-                messageBodyPanel.setOpaque(true); // apply color changes
-                messageBodyPanel.setLayout(new GridBagLayout()); // set layout manager
-                GridBagConstraints gbc = new GridBagConstraints();
-                responseDetailsTabs.add("Message Body", messageBodyPanel); // add body panel
+        frameMenuBar.add(applicationMenu);
+        frameMenuBar.add(viewMenu);
+        frameMenuBar.add(helpMenu);
+        frame.setMenuBar(frameMenuBar);
+    }
     
-    
-                JComboBox<String> bodyKinds = new JComboBox<>(); // create new combo box
-                bodyKinds.setBackground(backgroundColor); // set background color
-                bodyKinds.setOpaque(true); // apply color changes
-                bodyKinds.addItem("RAW"); 
-                bodyKinds.addItem("JSON");
-                bodyKinds.addItem("Preview");
-                gbc.gridx = gbc.gridy = 0;
-                gbc.weightx = 1; 
-                gbc.fill = GridBagConstraints.HORIZONTAL;
-                messageBodyPanel.add(bodyKinds, gbc);
 
-
-                // set the body edit panel
-                JPanel messageBodyShowPanel = new JPanel(); // create new panel
-                messageBodyShowPanel.setLayout(new CardLayout()); // set layout manager
-                messageBodyShowPanel.setBackground(backgroundColor); // set the background color
-                messageBodyShowPanel.setOpaque(true); // apply color changes
-                gbc.fill = GridBagConstraints.BOTH;
-                gbc.weightx = gbc.weighty = 2;
-                gbc.gridx = 0; gbc.gridy = 1;
-                messageBodyPanel.add(messageBodyShowPanel, gbc); // add edit panel 
-
-
-                // set JSON and RAW tab
-
-                JPanel jsonAndRawPanel = new JPanel(); // create new panel
-                jsonAndRawPanel.setLayout(new GridLayout(1, 1, 15, 15)); //set layout manager
-                jsonAndRawPanel.setBackground(backgroundColor); // set background color
-                jsonAndRawPanel.setOpaque(true); // apply color changes
-
-                JLabel jsonAndRawLabel = new JLabel("a"); // creat new text area
-                jsonAndRawLabel.setBorder(BorderFactory.createLineBorder(backgroundColor, 15));
-                jsonAndRawLabel.setBackground(Color.WHITE);
-                jsonAndRawLabel.setOpaque(true);
-                jsonAndRawLabel.setFont(jsonAndRawLabel.getFont().deriveFont(15.0f)); // set text size
-                jsonAndRawPanel.add(jsonAndRawLabel); // add text area
-
-                messageBodyShowPanel.add("JSON and RAW", jsonAndRawPanel); // add body panel
-
-                }
-
-
-
-                // set Headers tab
-                {
-                
-                // set header panel
-                JPanel headersPanel = new JPanel(); 
-                headersPanel.setLayout(new GridBagLayout());
-                GridBagConstraints gbc = new GridBagConstraints();
-                headersPanel.setBackground(backgroundColor);
-                headersPanel.setOpaque(true);
-                responseDetailsTabs.add("Headers", headersPanel);
-
-                
-                // set headers table
-                JTable headersTable = new JTable();
-                }
-            }
-
-
-
-            /*  set menu bar  */
-            {
-                // set menu bar
-                MenuBar frameMenuBar = new MenuBar();
-                
-
-                
-                // set application menu
-                Menu applicationMenu = new Menu("Application");
-                applicationMenu.setShortcut(new MenuShortcut(KeyEvent.VK_1, false));
-                
-                MenuItem optionItem = new MenuItem("Options");
-                optionItem.setShortcut(new MenuShortcut(KeyEvent.VK_O, false));
-                applicationMenu.add(optionItem);
-
-                MenuItem exitItem = new MenuItem("Exit");
-                exitItem.setShortcut(new MenuShortcut(KeyEvent.VK_E, false));
-                applicationMenu.add(exitItem);
-
-
-
-                // set view menu
-                Menu viewMenu = new Menu("View");
-                viewMenu.setShortcut(new MenuShortcut(KeyEvent.VK_2, false));
-
-                MenuItem toggleFullScreenItem = new MenuItem("Toggle Full Screen");
-                toggleFullScreenItem.setShortcut(new MenuShortcut(KeyEvent.VK_U, false));
-                viewMenu.add(toggleFullScreenItem);
-
-                MenuItem toggleSidebarItem = new MenuItem("Toggle Sidebar");
-                toggleSidebarItem.setShortcut(new MenuShortcut(KeyEvent.VK_U, true));
-                viewMenu.add(toggleSidebarItem);
-
-
-
-                // set help menu
-                Menu helpMenu = new Menu("Help");
-                helpMenu.setShortcut(new MenuShortcut(KeyEvent.VK_3, false));
-
-                MenuItem aboutItem = new MenuItem("About");
-                aboutItem.setShortcut(new MenuShortcut(KeyEvent.VK_B, false));
-                helpMenu.add(aboutItem);
-
-                MenuItem helpItem = new MenuItem("Help");
-                helpItem.setShortcut(new MenuShortcut(KeyEvent.VK_H, false));
-                helpMenu.add(helpItem);
-
-
-                frameMenuBar.add(applicationMenu);
-                frameMenuBar.add(viewMenu);
-                frameMenuBar.add(helpMenu);
-                frame.setMenuBar(frameMenuBar);
-            }
-
-            }
-        }
+    /**
+     * This method set view of the center panel with selected request
+     * 
+     * @param details : details of request
+     */
+    public static void openRequest(String details)
+    {
+        newRequestPanel.setPanel(details);
     }
 
+
+    /**
+     * This method save a request and add a button for it in gui
+     * 
+     * 
+     * @param gpName : name of the request group
+     * @param reqName : name of the request
+     * @param reqKind : request method
+     * @param reqDetails : a string of request details
+     */
+    public static void save(String gpName, String reqName, String reqKind, String reqDetails)
+    {
+        if (gpName.equals(""))
+            gpName = "last requests";
+        lastRequestsPanel.saveRequest(reqKind, reqName, gpName, reqDetails);
+    }
 
 
     /**
@@ -273,5 +182,137 @@ public class MainFrame
     public static void showFrame()
     {
         frame.setVisible(true);
+    }
+
+
+    /**
+     * @return a combo box of groups
+     */
+    public static JComboBox<String> getGroups()
+    {
+        return lastRequestsPanel.getGroupsComboBox();
+    }
+
+
+    /**
+     * This method updata the gui respones part
+     * 
+     * 
+     * @param statusCode : status code of response
+     * @param responseMessage : message of the request
+     * @param responseTime : time of the response
+     * @param contentLength : content length of re response
+     * @param contentFormat : format of the response body
+     * @param headers : headers of response
+     */
+    public static void updateGUI(int statusCode, String responseMessage, long responseTime, long contentLength, String contentFormat, HashMap<String, String> headers)
+    {
+        responsePanel.setTime(responseTime);
+        responsePanel.setResponseCodeAndMessage(statusCode, responseMessage);
+        responsePanel.setContentLength(contentLength);
+        responsePanel.setHeaders(headers);
+        
+        responsePanel.update(contentFormat);
+    }
+
+
+    /**
+     * This method shows errors 
+     */
+    public static void showError()
+    {
+        Scanner in = null;
+
+        try{ in = new Scanner(new File(DataBase.getErrorsLogGuiPath())); }
+        catch (FileNotFoundException ex) {}
+
+        String message = in.nextLine();
+        
+        JOptionPane.showMessageDialog(frame, message, "error", JOptionPane.ERROR_MESSAGE);
+    }
+
+
+
+
+
+
+
+
+
+
+    // an inner class for handling events
+    private static class EventHandler implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) 
+        {
+            if (e.getSource().equals(followRedirectsItem))
+            {
+                Insomnia.setFollowRedirects(!Insomnia.isFollowRedirects());
+
+                if (Insomnia.isFollowRedirects())
+                    followRedirectsItem.setLabel("Follow redirects:   ☑️");
+                else 
+                    followRedirectsItem.setLabel("Follow redirects:   ◻️");
+            }
+
+
+            if (e.getSource().equals(toggleFullScreenItem))
+            {
+                if (frame.getExtendedState() == 0) 
+                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                else
+                    frame.setExtendedState(0);
+            }
+
+
+            if (e.getSource().equals(toggleSidebarItem))
+            {
+                if (lastRequestsPanel.isVisible())
+                    lastRequestsPanel.setVisible(false);
+                else 
+                    lastRequestsPanel.setVisible(true);
+            }
+
+
+            if (e.getSource().equals(helpItem))
+            {
+                JFrame helpTextFrame = new JFrame("Help");
+
+                helpTextFrame.setLocationRelativeTo(frame);
+                helpTextFrame.setMinimumSize(new Dimension(450, 300));
+                helpTextFrame.setLocation(500, 250);
+                helpTextFrame.setResizable(false);
+
+                JPanel helpFramePanel = new JPanel(new GridLayout(1, 1, 30, 30));
+                helpFramePanel.setBackground(backgroundColor);
+                helpFramePanel.setOpaque(true);
+                helpTextFrame.add(helpFramePanel);
+
+                JTextArea helpTextArea = new JTextArea();
+                helpTextArea.setBackground(backgroundColor);
+                helpTextArea.setForeground(Color.WHITE);
+                helpTextArea.setOpaque(true);
+                helpTextArea.setEditable(false);
+
+                helpTextArea.setFont(helpTextArea.getFont().deriveFont(20));
+                helpTextArea.setText("   Insomnia  \n\n" +
+                                     "you can send a http request with this app\n" + 
+                                     "supported methods for your reqeusts are: GET, POST, PUT and DELETE\n" +
+                                     "if you want to send a file as your request form data body, please\n" + 
+                                     "write '(FILE)' at the end of the key and give the ablsoute path of\n" +
+                                     "your file as value.\n" + 
+                                     "in headers tab, if you click on one them, the value and key of that\n" + 
+                                     "will be copy on your clipboard.\n" +
+                                     "you can set follow redirect and system tray in application menu in \n" +
+                                     "menu bar");
+                helpFramePanel.add(helpTextArea);
+
+                helpTextFrame.setVisible(true);
+            }
+
+
+            if (e.getSource().equals(aboutItem))
+                JOptionPane.showMessageDialog(frame, "you can find me at https://github.com/MmahdiM79 ;)", "contact us", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }
