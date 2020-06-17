@@ -9,7 +9,7 @@ import java.util.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.3.0
+ * @version 0.3.5
  */
 public class Request implements Serializable
 {
@@ -72,6 +72,9 @@ public class Request implements Serializable
 
 
 
+    // user args for this req
+    private String reqDetails = null;
+
     // check first send
     protected boolean check = true;
 
@@ -101,15 +104,17 @@ public class Request implements Serializable
      * @param query : a {@code String} of request query in this format: "name=value&name1=value1& ..."
      * @param followRedirect : set it {@code true} if you want follow redirect
      * @param showResponseHeaders : show the result on terminal or not
+     * @param reqDetails : user given args for this requset
      * 
      * @throws IOException make sure that given url has protocol and you are cannected to the internet 
      */
-    public Request(String name, String group, String url, String headers, String query, boolean followRedirect, boolean showResponseHeaders) 
+    public Request(String name, String group, String url, String headers, String query, boolean followRedirect, boolean showResponseHeaders, String reqDetails) 
             throws IOException
     {
         // set name and group
         requestName = name;
         groupName = group;
+        this.reqDetails = reqDetails;
 
 
         // set url and query
@@ -215,6 +220,11 @@ public class Request implements Serializable
     public String getResponseHeader(String key) { return responseHeaders.get(key); }
 
     /**
+     * @return response content length
+     */
+    public long getResponseSize() { return responseSize; }
+
+    /**
      * @return format of the response body
      */
     public String getResponseBodyFormat() { return responseBodyFormat; }
@@ -223,6 +233,11 @@ public class Request implements Serializable
      * @return time of resopnse to this request (ms)
      */
     public long getResponseTime() { return responseTime; }
+
+    /**
+     * @return user given args for this request
+     */
+    public String getReqDetails() { return reqDetails; }
 
     /**
      * @return {@code true} if this request follows redirects
@@ -235,10 +250,7 @@ public class Request implements Serializable
     /**
      * @return {@code true} if this request shows response headers 
      */
-    public boolean isShowResponseHeaders()
-    {
-        return showResponseHeaders;
-    }
+    public boolean isShowResponseHeaders() { return showResponseHeaders; }
     
 
 
@@ -316,6 +328,7 @@ public class Request implements Serializable
             catch (MalformedURLException e) { System.out.println('I'); }
 
             this.run(); 
+            return;
         }
 
 
@@ -323,12 +336,12 @@ public class Request implements Serializable
         // check streams 
         if (connection.getErrorStream() != null)
         {
-            try{ Out.printResponseBody(connection.getErrorStream()); }
+            try{ responseSize =  Out.printResponseBody(connection.getErrorStream()); }
             catch(IOException e){}
         }
         else
         {
-            try{ Out.printResponseBody(connection.getInputStream()); }
+            try{ responseSize = Out.printResponseBody(connection.getInputStream()); }
             catch(IOException e){}
         }
 
@@ -358,8 +371,7 @@ public class Request implements Serializable
     {
         try 
         {
-            if (DataBase.saveRequest(groupName, requestName, this)) 
-                Out.printErrors("issaved");
+            DataBase.saveRequest(groupName, requestName, this);
         }
         catch (IOException e) { Out.printErrors("save"); }
     }
