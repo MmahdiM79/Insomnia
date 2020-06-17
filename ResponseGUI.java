@@ -17,7 +17,7 @@ import java.awt.datatransfer.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.1.0
+ * @version 0.2.0
  */
 public class ResponseGUI extends JPanel
 {
@@ -97,6 +97,7 @@ public class ResponseGUI extends JPanel
     public ResponseGUI(Color bgColor) 
     {
         super();
+        super.setMaximumSize(new Dimension(925, 600));
         super.setLayout(new BorderLayout(0, 0)); // set layout manager
         super.setBackground(backgroundColor); // set background color
         super.setOpaque(true); // apply color changes
@@ -223,8 +224,6 @@ public class ResponseGUI extends JPanel
         headersPanel.setLayout(new BoxLayout(headersPanel, BoxLayout.Y_AXIS));
         headersPanel.setBackground(backgroundColor);
         headersPanel.setOpaque(true);
-        responseDetailsTabs.add("Headers", headersPanel);
-
         
         // set headers table
         nameValueLable.setHorizontalAlignment(SwingConstants.CENTER);
@@ -235,6 +234,12 @@ public class ResponseGUI extends JPanel
         nameValueLable.setOpaque(true);
         nameValueLable.addActionListener(mainHandler);
         headersPanel.add(nameValueLable);
+
+        JScrollPane headersPanelScrollPane = new JScrollPane(headersPanel);
+        headersPanelScrollPane.setBackground(backgroundColor);
+        headersPanelScrollPane.setOpaque(true);
+
+        responseDetailsTabs.add("Headers", headersPanelScrollPane);
 
 
 
@@ -268,11 +273,12 @@ public class ResponseGUI extends JPanel
             /*  Method  */
 
     /**
-     * Set status code in GUI
+     * Set status code and Message in GUI
      * 
      * @param responseCode : status code of the request
+     * @param responseMessage : message of the response
      */
-    public void setResponseCode(int responseCode)
+    public void setResponseCodeAndMessage(int responseCode, String responseMessage)
     {
         Color colorToChange;
 
@@ -288,7 +294,7 @@ public class ResponseGUI extends JPanel
 
         statusCodLabel.setBorder(BorderFactory.createLineBorder(colorToChange, 6));
         statusCodLabel.setBackground(colorToChange);
-        statusCodLabel.setText("" + responseCode);
+        statusCodLabel.setText("" + responseCode + " " + responseMessage);
     }
 
 
@@ -297,9 +303,10 @@ public class ResponseGUI extends JPanel
      * 
      * @param responseSize : size of the response content
      */
-    public void setContentLength(int responseSize)
+    public void setContentLength(long responseSize)
     {
         responseSizeLabel.setText("" + responseSize + " kb");
+        responseSizeLabel.updateUI();
     }
 
 
@@ -308,9 +315,10 @@ public class ResponseGUI extends JPanel
      * 
      * @param time : time in 'ms'
      */
-    public void setTime(int time)
+    public void setTime(long time)
     {
         responseTimeLabel.setText("" + time + " ms");
+        responseTimeLabel.updateUI();
     }
 
 
@@ -321,8 +329,17 @@ public class ResponseGUI extends JPanel
      */
     public void setHeaders(HashMap<String, String> headers)
     {
+        headersPanel.removeAll();
+        headersPanel.add(nameValueLable);
+
         for (String key : headers.keySet())
+        {
+            if (headers.get(key).length() > 25)
+                continue;
+
             headersPanel.add(new NameValuedeHeader(key, headers.get(key)));
+        }
+        headersPanel.updateUI();
     }
 
 
@@ -332,12 +349,14 @@ public class ResponseGUI extends JPanel
      * @param contentType : type of the resposne body
      */
     public void update(String contentType)
-    {
+    {       
         // time line update
         try 
         {
             FileInputStream timeLineFile = new FileInputStream(new File(DataBase.getTimeLineGuiPath()));
             timeLineTextArea.setText(new String(timeLineFile.readAllBytes()));
+            timeLinePanel.repaint();
+            timeLinePanel.revalidate();
             timeLineFile.close();
         }
         catch (IOException e) {}
@@ -353,40 +372,48 @@ public class ResponseGUI extends JPanel
 
 
 
-        if (contentType.equals("png") || contentType.equals("jpg"))
+        if (contentType != null)
         {
-            ImageIcon body = new ImageIcon(DataBase.getResponseBodyGuiPath());
-            JLabel bodylLabel = new JLabel(body);
-            priviewPanel.add(bodylLabel);
-        }
-        else if (contentType.equals("json"))
-        {
-            String body = null;
-            try
+         
+            if (contentType.equals("png") || contentType.equals("jpg"))
             {
-                body = new String((new FileInputStream(new File(DataBase.getResponseBodyGuiPath()))).readAllBytes());
+                ImageIcon body = new ImageIcon(DataBase.getResponseBodyGuiPath());
+                JLabel bodylLabel = new JLabel(body);
+                priviewPanel.add(bodylLabel);
             }
-            catch (IOException e) {}
-
-            body = body.substring(1, body.length()-1);
-            String[] pairs = body.split(",");
-
-            String priviewText = "{ ";
-            for (String pair : pairs)
+            else if (contentType.equals("json"))
             {
-                pair = pair.replace(":", ":  ");
-                priviewText = priviewText + "\n\t" + pair;
+                String body = null;
+                try
+                {
+                    body = new String((new FileInputStream(new File(DataBase.getResponseBodyGuiPath()))).readAllBytes());
+                }
+                catch (IOException e) {}
+
+                body = body.substring(1, body.length()-1);
+                String[] pairs = body.split(",");
+
+                String priviewText = "{ ";
+                for (String pair : pairs)
+                {
+                    pair = pair.replace(":", ":  ");
+                    priviewText = priviewText + "\n\t" + pair;
+                }
+                priviewText = priviewText + "\n}";
+
+
+                JTextArea priviewTextArea = new JTextArea(priviewText);
+                priviewTextArea.setBackground(backgroundColor);
+                priviewTextArea.setForeground(Color.WHITE);
+                priviewTextArea.setOpaque(true);
+
+                priviewPanel.add(priviewTextArea);
             }
-            priviewText = priviewText + "\n}";
-
-
-            JTextArea priviewTextArea = new JTextArea(priviewText);
-            priviewTextArea.setBackground(backgroundColor);
-            priviewTextArea.setForeground(Color.WHITE);
-            priviewTextArea.setOpaque(true);
-
-            priviewPanel.add(priviewTextArea);
+            else
+                priviewPanel.removeAll();
         }
+        else 
+            priviewPanel.removeAll();
     }
 
 
@@ -441,8 +468,9 @@ public class ResponseGUI extends JPanel
             this.handler = new EventHandler();
 
 
-            super.setHorizontalAlignment(SwingConstants.CENTER);
+            super.setHorizontalAlignment(SwingConstants.LEFT);
             super.setMaximumSize(new Dimension(600, 42));
+            super.setMinimumSize(new Dimension(600, 42));
             super.setBackground(backgroundColor);
             super.setForeground(Color.WHITE);
             super.setFont(super.getFont().deriveFont(12.0f));
