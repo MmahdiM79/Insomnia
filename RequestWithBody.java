@@ -14,7 +14,7 @@ import java.io.*;
  * 
  * 
  * @author Mohammad Mahdi Malmasi
- * @version 0.2.0
+ * @version 0.2.5
  */
 public class RequestWithBody extends Request
 {
@@ -55,6 +55,8 @@ public class RequestWithBody extends Request
      * @param query : a {@code String} of request query in this format: "name=value&name1=value1& ..."
      * @param followRedirect : set it {@code true} if you want follow redirect
      * @param terminalShow : show the result on terminal or not
+     * @param reqDetails : user given args for this requset
+     * 
      * @throws IOException
      */
     public RequestWithBody(String name, 
@@ -66,9 +68,10 @@ public class RequestWithBody extends Request
                            String bodyDatas, 
                            String query, 
                            boolean followRedirect, 
-                           boolean terminalShow)  throws IOException
+                           boolean terminalShow,
+                           String reqDetails)  throws IOException
     {
-        super(name, group, url, (headers == null ? "": headers), query, followRedirect, terminalShow);
+        super(name, group, url, (headers == null ? "": headers), query, followRedirect, terminalShow, reqDetails);
 
         super.setRequestKind(method);
 
@@ -198,12 +201,12 @@ public class RequestWithBody extends Request
 
         if (connection.getErrorStream() != null)
         {
-            try{ Out.printResponseBody(connection.getErrorStream()); }
+            try{ responseSize = Out.printResponseBody(connection.getErrorStream()); }
             catch(IOException e){}
         }
         else
         {
-            try{ Out.printResponseBody(connection.getInputStream()); }
+            try{ responseSize = Out.printResponseBody(connection.getInputStream()); }
             catch(IOException e){}
         }
 
